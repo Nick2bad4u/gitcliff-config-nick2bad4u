@@ -13,6 +13,8 @@ const isCiEnvironment = process.env["CI"] === "true",
     /** `true` when collecting V8 coverage, which writes shared temporary files. */
     isCoverageRun =
         process.env["COVERAGE"] === "true" ||
+        process.env["npm_lifecycle_event"] === "coverage" ||
+        process.env["npm_lifecycle_script"]?.includes("--coverage") === true ||
         process.argv.some(
             (argument) =>
                 argument === "--coverage" || argument.startsWith("--coverage.")
@@ -36,7 +38,8 @@ const isCiEnvironment = process.env["CI"] === "true",
         process.env["VITEST_HANGING_PROCESS_REPORTER"] ??
         "false",
     /** Raw flag controlling optional Vitest typecheck execution. */
-    rawVitestTypecheckFlag = process.env["VITEST_TYPECHECK"] ?? "true",
+    rawVitestTypecheckFlag =
+        process.env["VITEST_TYPECHECK"] ?? (isCoverageRun ? "false" : "true"),
     /** Normalized `true` when hanging-process reporter is explicitly enabled. */
     shouldEnableHangingProcessReporter = [
         "1",

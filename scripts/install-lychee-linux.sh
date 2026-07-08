@@ -26,10 +26,18 @@ if [ "${expected_checksum}" != "${actual_checksum}" ]; then
 fi
 
 tar -xzf "${archive_path}" -C "${install_dir}"
-chmod +x "${install_dir}/lychee"
+lychee_path="$(find "${install_dir}" -type f -name lychee -print -quit)"
 
-if [ -n "${GITHUB_PATH:-}" ]; then
-    echo "${install_dir}" >> "${GITHUB_PATH}"
+if [ -z "${lychee_path}" ]; then
+    echo "Could not find lychee binary in ${archive_name}." >&2
+    exit 1
 fi
 
-"${install_dir}/lychee" --version
+chmod +x "${lychee_path}"
+lychee_bin_dir="$(dirname "${lychee_path}")"
+
+if [ -n "${GITHUB_PATH:-}" ]; then
+    echo "${lychee_bin_dir}" >> "${GITHUB_PATH}"
+fi
+
+"${lychee_path}" --version

@@ -1,0 +1,171 @@
+import { execFile } from "node:child_process";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import * as path from "node:path";
+import { fileURLToPath } from "node:url";
+import { describe, expect, it } from "vitest";
+
+const repositoryRoot = path.dirname(import.meta.dirname);
+const cliffConfigPath = path.join(repositoryRoot, "cliff.toml");
+const gitCliffCliPath = fileURLToPath(import.meta.resolve("git-cliff/cli"));
+
+const run = async (
+    command: string,
+    args: readonly string[],
+    cwd: string
+): Promise<string> =>
+    new Promise((resolve, reject) => {
+        const childProcess = execFile(
+            command,
+            [...args],
+            { cwd, encoding: "utf8" },
+            (error, stdout, stderr) => {
+                if (error) {
+                    reject(new Error(error.message, { cause: error }));
+                    return;
+                }
+
+                resolve(`${stdout}${stderr}`);
+            }
+        );
+
+        childProcess.once("error", reject);
+    });
+
+const commitFixture = async (
+    repoPath: string,
+    fileName: string,
+    commitMessage: string,
+    fileContents: string,
+    commitBody?: string
+): Promise<void> => {
+    await writeFile(path.join(repoPath, fileName), fileContents);
+    await run("git", ["add", fileName], repoPath);
+    const commitArguments =
+        commitBody === undefined
+            ? [
+                  "commit",
+                  "-m",
+                  commitMessage,
+              ]
+            : [
+                  "commit",
+                  "-m",
+                  commitMessage,
+                  "-m",
+                  commitBody,
+              ];
+
+    await run("git", commitArguments, repoPath);
+};
+
+const countOccurrences = (text: string, searchValue: string): number =>
+    text.split(searchValue).length - 1;
+
+const initializeRepository = async (repoPath: string): Promise<void> => {
+    await run("git", ["init"], repoPath);
+    await run(
+        "git",
+        [
+            "config",
+            "user.name",
+            "Config Test",
+        ],
+        repoPath
+    );
+    await run(
+        "git",
+        [
+            "config",
+            "user.email",
+            "config-test@example.com",
+        ],
+        repoPath
+    );
+};
+
+describe("cliff.toml", () => {
+    it("renders repo-specific links, parser groups, dependency cleanup, and commit statistics", async () => {
+        expect.assertions(17);
+
+        const repoPath = await mkdtemp(path.join(tmpdir(), "gitcliff-config-"));
+
+        try {
+            await initializeRepository(repoPath);
+            await commitFixture(
+                repoPath,
+                "feature.txt",
+                "✨ [feat] (core) add renderer",
+                "feature\n"
+            );
+            await commitFixture(
+                repoPath,
+                "fix.txt",
+                "fix(parser): handle escaped scope",
+                "fix\n"
+            );
+            await commitFixture(
+                repoPath,
+                "docs.txt",
+                "📝 [docs] Explain shared config",
+                "docs\n",
+                "Document shared config usage.\n\nSigned-off-by: Config Test <config-test@example.com>"
+            );
+            await commitFixture(
+                repoPath,
+                "dependencies.txt",
+                "chore(deps): update npm dependencies",
+                "dependencies\n"
+            );
+            await commitFixture(
+                repoPath,
+                "lodash.txt",
+                "Bump lodash from 4.17.20 to 4.17.21",
+                "lodash\n"
+            );
+            await commitFixture(
+                repoPath,
+                "import.txt",
+                "Initial import",
+                "import\n"
+            );
+
+            const changelog = await run(
+                process.execPath,
+                [
+                    gitCliffCliPath,
+                    "--config",
+                    cliffConfigPath,
+                    "--github-repo",
+                    "Nick2bad4u/example-package",
+                    "--unreleased",
+                ],
+                repoPath
+            );
+
+            expect(changelog).toContain("## [Unreleased]");
+            expect(changelog).toContain("### Commit Statistics");
+            expect(changelog).toContain("6 commits included in this release.");
+            expect(changelog).toContain("conventional commit");
+            expect(changelog).toContain(
+                "days between the first and last commit."
+            );
+            expect(changelog).toContain(
+                "https://github.com/Nick2bad4u/example-package/commit/"
+            );
+            expect(changelog).toContain("### ✨ Features");
+            expect(changelog).toContain("### 🛠️ Bug Fixes");
+            expect(changelog).toContain("### 📝 Documentation");
+            expect(changelog).toContain("### 📦 Dependencies");
+            expect(changelog).toContain("### 🛠️ Other Changes");
+            expect(changelog).toContain("[dependency] Update lodash");
+            expect(changelog).not.toContain("[dependency] test");
+            expect(changelog).toMatch(/stats: \d+ files?, \+\d+, -\d+/v);
+            expect(changelog).not.toContain("Signed-off-by:");
+            expect(countOccurrences(changelog, "stats:")).toBe(6);
+            expect(changelog).toContain("## ⭐ Contributors");
+        } finally {
+            await rm(repoPath, { force: true, recursive: true });
+        }
+    }, 60_000);
+});

@@ -53,13 +53,13 @@ All notable changes to this project will be documented in this file.\n
 {% for group, commits in commits | group_by(attribute="group") %}
   ### {{ group | striptags | trim | upper_first }}
   {% for commit in commits %}
-    - [`{{ commit.id | truncate(length=7, end="") }}`](https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}/commit/{{ commit.id }} "📝 Diff: {{ commit.statistics.files_changed }} file{% if commit.statistics.files_changed != 1 %}s{% endif %}, ++{{ commit.statistics.additions }} | --{{ commit.statistics.deletions }}") — {% if commit.scope %}*({{ commit.scope }})* {% endif %}\
+    - [`{{ commit.id | truncate(length=7, end="") }}`](https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}/commit/{{ commit.id }} "📝 Diff: {{ commit.statistics.files_changed }} file{% if commit.statistics.files_changed != 1 %}s{% endif %}, ++{{ commit.statistics.additions }} | --{{ commit.statistics.deletions }}") — _(stats: {{ commit.statistics.files_changed }} file{% if commit.statistics.files_changed != 1 %}s{% endif %}, +{{ commit.statistics.additions }}, -{{ commit.statistics.deletions }})_ {% if commit.scope %}*({{ commit.scope }})* {% endif %}\
       {% if commit.breaking %}[**breaking**] {% endif %}\
       {{ commit.message
           | upper_first
           | replace(from="\n", to="\n    ")
           | replace(from=" - ", to="\n    - ")
-      }} _(stats: {{ commit.statistics.files_changed }} file{% if commit.statistics.files_changed != 1 %}s{% endif %}, +{{ commit.statistics.additions }}, -{{ commit.statistics.deletions }})_
+      }}
 
   {% endfor %}
 {% endfor %}\n
@@ -104,7 +104,7 @@ This project license is here: [Project License](https://github.com/{{ remote.git
         # Generic bump message cleanup
         { pattern = "Bump", replace = "[dependency] Update" },
         # Remove git trailers that look noisy in rendered changelog entries
-        { pattern = '\n\nSigned-off-by:.*', replace = "" },
+        { pattern = '\n\nSigned-off-by:[^\n\r]*(\r?\nSigned-off-by:[^\n\r]*)*', replace = "" },
     ]
     protect_breaking_commits = false
     render_always            = true

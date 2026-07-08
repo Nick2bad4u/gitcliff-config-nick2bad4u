@@ -85,6 +85,7 @@
         "traceResolution": false,
         "tsBuildInfoFile": "./.cache/tsbuildinfo/tsconfig.tsbuildinfo",
         "types": [
+            "node",
             "vite/client",
             "vitest/globals"
         ],

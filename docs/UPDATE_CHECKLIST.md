@@ -4,7 +4,7 @@ Use this checklist when publishing `gitcliff-config-nick2bad4u` or migrating a r
 
 ## Publish This Config Package
 
-- [ ] Confirm `cliff.toml` has the intended changelog groups, postprocessors, statistics output, and fallback `[remote.github]` repository.
+- [ ] Confirm `cliff.toml` has the intended changelog groups, postprocessors, compact per-commit statistics, and fallback `[remote.github]` repository.
 - [ ] Run `npm run changelog:preview` and verify commit links point at `Nick2bad4u/gitcliff-config-nick2bad4u`.
 - [ ] Run `npm run build`.
 - [ ] Run `npm run typecheck`.

@@ -40,26 +40,21 @@ All notable changes to this project will be documented in this file.\n
 {% elif bump_type == "patch" %}
   > 🩹 **Patch release:** this version focuses on fixes, maintenance, and smaller improvements.
 {% endif %}
-{% if statistics %}
-{% set commits_timespan = statistics.commits_timespan | default(value=0) %}
-  ### Commit Statistics
-  - {{ statistics.commit_count }} commit{% if statistics.commit_count != 1 %}s{% endif %} included in this release.
-  - {{ statistics.conventional_commit_count }} conventional commit{% if statistics.conventional_commit_count != 1 %}s{% endif %} parsed.
-  - {{ commits_timespan }} day{% if commits_timespan != 1 %}s{% endif %} between the first and last commit.
-{% if statistics.links | length > 0 %}
-  - {{ statistics.links | length }} linked issue/reference{% if statistics.links | length != 1 %}s{% endif %} detected.
-{% endif %}
-{% endif %}
 {% for group, commits in commits | group_by(attribute="group") %}
   ### {{ group | striptags | trim | upper_first }}
   {% for commit in commits %}
-    - [`{{ commit.id | truncate(length=7, end="") }}`](https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}/commit/{{ commit.id }} "📝 Diff: {{ commit.statistics.files_changed }} file{% if commit.statistics.files_changed != 1 %}s{% endif %}, ++{{ commit.statistics.additions }} | --{{ commit.statistics.deletions }}") — _(stats: {{ commit.statistics.files_changed }} file{% if commit.statistics.files_changed != 1 %}s{% endif %}, +{{ commit.statistics.additions }}, -{{ commit.statistics.deletions }})_ {% if commit.scope %}*({{ commit.scope }})* {% endif %}\
+{% set commit_message_lines = commit.message | split(pat="\n") %}
+    - [`{{ commit.id | truncate(length=7, end="") }}`](https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}/commit/{{ commit.id }} "Diff: {{ commit.statistics.files_changed }} file{% if commit.statistics.files_changed != 1 %}s{% endif %}, ++{{ commit.statistics.additions }} | --{{ commit.statistics.deletions }}") — {% if commit.scope %}*({{ commit.scope }})* {% endif %}\
       {% if commit.breaking %}[**breaking**] {% endif %}\
-      {{ commit.message
+      {{ commit_message_lines | first
           | upper_first
-          | replace(from="\n", to="\n    ")
           | replace(from=" - ", to="\n    - ")
-      }}
+      }} <sub><em>({{ commit.statistics.files_changed }} file{% if commit.statistics.files_changed != 1 %}s{% endif %}, <ins>+{{ commit.statistics.additions }}</ins>, <del>-{{ commit.statistics.deletions }}</del>)</em></sub>
+{%- for commit_message_line in commit_message_lines %}
+{%- if not loop.first %}
+    {{ commit_message_line | replace(from=" - ", to="\n    - ") }}
+{%- endif %}
+{%- endfor %}
 
   {% endfor %}
 {% endfor %}\n

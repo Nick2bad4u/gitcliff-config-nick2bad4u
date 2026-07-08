@@ -62,6 +62,15 @@ const commitFixture = async (
 const countOccurrences = (text: string, searchValue: string): number =>
     text.split(searchValue).length - 1;
 
+const hasOnlyPlainDiffTitle = (text: string): boolean =>
+    text.includes('"Diff: ') && !text.includes('"📝 Diff: ');
+
+const isOrderedRenderedSubjectAndBody = (
+    subjectIndex: number,
+    bodyIndex: number
+): boolean =>
+    subjectIndex !== -1 && bodyIndex !== -1 && subjectIndex < bodyIndex;
+
 const initializeRepository = async (repoPath: string): Promise<void> => {
     await run("git", ["init"], repoPath);
     await run(
@@ -85,8 +94,8 @@ const initializeRepository = async (repoPath: string): Promise<void> => {
 };
 
 describe("cliff.toml", () => {
-    it("renders repo-specific links, parser groups, dependency cleanup, and commit statistics", async () => {
-        expect.assertions(17);
+    it("renders repo-specific links, parser groups, dependency cleanup, and compact commit statistics", async () => {
+        expect.assertions(19);
 
         const repoPath = await mkdtemp(path.join(tmpdir(), "gitcliff-config-"));
 
@@ -144,15 +153,14 @@ describe("cliff.toml", () => {
             );
 
             expect(changelog).toContain("## [Unreleased]");
-            expect(changelog).toContain("### Commit Statistics");
-            expect(changelog).toContain("6 commits included in this release.");
-            expect(changelog).toContain("conventional commit");
-            expect(changelog).toContain(
-                "days between the first and last commit."
+            expect(changelog).not.toContain("### Commit Statistics");
+            expect(changelog).not.toContain(
+                "commits included in this release."
             );
             expect(changelog).toContain(
                 "https://github.com/Nick2bad4u/example-package/commit/"
             );
+            expect(hasOnlyPlainDiffTitle(changelog)).toBe(true);
             expect(changelog).toContain("### ✨ Features");
             expect(changelog).toContain("### 🛠️ Bug Fixes");
             expect(changelog).toContain("### 📝 Documentation");
@@ -160,9 +168,28 @@ describe("cliff.toml", () => {
             expect(changelog).toContain("### 🛠️ Other Changes");
             expect(changelog).toContain("[dependency] Update lodash");
             expect(changelog).not.toContain("[dependency] test");
-            expect(changelog).toMatch(/stats: \d+ files?, \+\d+, -\d+/v);
+            expect(changelog).toMatch(
+                /<sub><em>\(\d+ files?, <ins>\+\d+<\/ins>, <del>-\d+<\/del>\)<\/em><\/sub>/v
+            );
+
+            const documentationSubjectIndex = changelog.indexOf(
+                "Explain shared config <sub><em>"
+            );
+            const documentationBodyIndex = changelog.indexOf(
+                "Document shared config usage."
+            );
+
+            expect(
+                isOrderedRenderedSubjectAndBody(
+                    documentationSubjectIndex,
+                    documentationBodyIndex
+                )
+            ).toBe(true);
+
+            expect(changelog).not.toContain("_(stats:");
             expect(changelog).not.toContain("Signed-off-by:");
-            expect(countOccurrences(changelog, "stats:")).toBe(6);
+            expect(countOccurrences(changelog, "<sub><em>(")).toBe(6);
+            expect(countOccurrences(changelog, "stats:")).toBe(0);
             expect(changelog).toContain("## ⭐ Contributors");
         } finally {
             await rm(repoPath, { force: true, recursive: true });

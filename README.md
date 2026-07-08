@@ -1,41 +1,60 @@
-# Nick2bad4u Repository Template
+# gitcliff-config-nick2bad4u
 
-[![NPM license.](https://flat.badgen.net/npm/license/nick2bad4u-repo-template?color=purple)](https://github.com/Nick2bad4u/nick2bad4u-repo-template/blob/main/LICENSE) [![NPM total downloads.](https://flat.badgen.net/npm/dt/nick2bad4u-repo-template?color=pink)](https://www.npmjs.com/package/nick2bad4u-repo-template) [![Latest GitHub release.](https://flat.badgen.net/github/release/Nick2bad4u/nick2bad4u-repo-template?color=cyan)](https://github.com/Nick2bad4u/nick2bad4u-repo-template/releases) [![GitHub stars.](https://flat.badgen.net/github/stars/Nick2bad4u/nick2bad4u-repo-template?color=yellow)](https://github.com/Nick2bad4u/nick2bad4u-repo-template/stargazers) [![GitHub forks.](https://flat.badgen.net/github/forks/Nick2bad4u/nick2bad4u-repo-template?color=green)](https://github.com/Nick2bad4u/nick2bad4u-repo-template/forks) [![GitHub open issues.](https://flat.badgen.net/github/open-issues/Nick2bad4u/nick2bad4u-repo-template?color=red)](https://github.com/Nick2bad4u/nick2bad4u-repo-template/issues) [![Codecov.](https://codecov.io/gh/Nick2bad4u/nick2bad4u-repo-template/branch/main/graph/badge.svg)](https://codecov.io/gh/Nick2bad4u/nick2bad4u-repo-template)
+[![NPM license.](https://flat.badgen.net/npm/license/gitcliff-config-nick2bad4u?color=purple)](https://github.com/Nick2bad4u/gitcliff-config-nick2bad4u/blob/main/LICENSE) [![NPM total downloads.](https://flat.badgen.net/npm/dt/gitcliff-config-nick2bad4u?color=pink)](https://www.npmjs.com/package/gitcliff-config-nick2bad4u) [![Latest GitHub release.](https://flat.badgen.net/github/release/Nick2bad4u/gitcliff-config-nick2bad4u?color=cyan)](https://github.com/Nick2bad4u/gitcliff-config-nick2bad4u/releases) [![GitHub stars.](https://flat.badgen.net/github/stars/Nick2bad4u/gitcliff-config-nick2bad4u?color=yellow)](https://github.com/Nick2bad4u/gitcliff-config-nick2bad4u/stargazers) [![GitHub forks.](https://flat.badgen.net/github/forks/Nick2bad4u/gitcliff-config-nick2bad4u?color=green)](https://github.com/Nick2bad4u/gitcliff-config-nick2bad4u/forks) [![GitHub open issues.](https://flat.badgen.net/github/open-issues/Nick2bad4u/gitcliff-config-nick2bad4u?color=red)](https://github.com/Nick2bad4u/gitcliff-config-nick2bad4u/issues) [![Codecov.](https://codecov.io/gh/Nick2bad4u/gitcliff-config-nick2bad4u/branch/main/graph/badge.svg)](https://codecov.io/gh/Nick2bad4u/gitcliff-config-nick2bad4u)
 
-Starter repository for the tooling patterns used across the most active repos under `C:\Repos` and `F:\Repos`.
+Shared [`git-cliff`](https://git-cliff.org/) changelog configuration for Nick2bad4u repositories.
 
-The target shape is a modern public npm package or config/plugin repository:
+The package ships:
 
-- Node 24 with npm 11.
-- ESM package layout.
-- TypeScript build and strict typecheck.
-- Vitest tests and coverage.
-- Shared Nick2bad4u configs for ESLint, Prettier, npm-package-json-lint, Remark, Secretlint, Gitleaks, Yamllint, Stylelint, TSDoc, and TypeDoc.
-- GitHub Actions for CI, CodeQL, dependency/security automation, Dependabot, labeling, stale issue handling, and npm provenance publishing.
-- Agent instructions and commit-message guidance so new AI sessions do not have to rediscover the project rules.
+- `cliff.toml`, the reusable changelog template and commit parser configuration.
 
-## Use This Template
-
-After creating a new repo from this template, run:
+## Install
 
 ```bash
-npm run setup:template -- --name my-package --description "Package description"
-npm install
-npm run lint:all
+npm install --save-dev gitcliff-config-nick2bad4u git-cliff
 ```
 
-Useful options:
+`git-cliff` is a peer dependency because the consuming repository should control its CLI version. Use git-cliff `2.10.0` or newer; this config uses the commit and release statistics fields added in that line.
 
-```bash
-npm run setup:template -- --name eslint-plugin-example --description "ESLint plugin for example rules" --repo Nick2bad4u/eslint-plugin-example
-npm run setup:template -- --name internal-tool --private true --no-publish
-npm run setup:template -- --name docs-plugin --docs true --stylelint true
+## Recommended Scripts
+
+Add these scripts to consuming repositories:
+
+```json
+{
+ "scripts": {
+  "changelog:generate": "git cliff --config node_modules/gitcliff-config-nick2bad4u/cliff.toml --github-repo Nick2bad4u/my-package --output CHANGELOG.md",
+  "changelog:preview": "git cliff --config node_modules/gitcliff-config-nick2bad4u/cliff.toml --github-repo Nick2bad4u/my-package --unreleased",
+  "changelog:release-notes": "git cliff --config node_modules/gitcliff-config-nick2bad4u/cliff.toml --github-repo Nick2bad4u/my-package --current"
+ }
+}
 ```
 
-## What Gets Standardized
+Do not pass `--strip all` for release notes. The shared release-notes command intentionally emits the full rendered changelog section.
 
-The template intentionally keeps app-specific workflows, Electron build jobs, Docusaurus deploys, Codecov, SonarCloud, VirusTotal, and IndexNow out of the default CI path. Those exist in your active repos, but they are not universal enough to belong in every new repo.
+## Repository Links
 
-## Maintenance Checklist
+The TOML file contains this package's repository as a fallback so it can generate its own changelog. In other repositories, pass the consuming repository explicitly with `--github-repo owner/repo`.
 
-Use [docs/UPDATE_CHECKLIST.md](docs/UPDATE_CHECKLIST.md) when creating a new repository from this template or refreshing the template after shared tooling updates.
+In GitHub Actions, set `GITHUB_REPO` once and omit `--github-repo` from the scripts:
+
+```yaml
+env:
+ GITHUB_REPO: "${{ github.repository }}"
+```
+
+Then use scripts like:
+
+```json
+{
+ "scripts": {
+  "changelog:generate": "git cliff --config node_modules/gitcliff-config-nick2bad4u/cliff.toml --output CHANGELOG.md",
+  "changelog:preview": "git cliff --config node_modules/gitcliff-config-nick2bad4u/cliff.toml --unreleased",
+  "changelog:release-notes": "git cliff --config node_modules/gitcliff-config-nick2bad4u/cliff.toml --current"
+ }
+}
+```
+
+## Maintenance
+
+Use [docs/UPDATE_CHECKLIST.md](docs/UPDATE_CHECKLIST.md) when publishing a new version of this config or refreshing repositories that consume it.

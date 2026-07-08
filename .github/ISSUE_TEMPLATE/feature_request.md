@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest a new rule or improvement for nick2bad4u-repo-template
+about: Suggest a new config or tooling improvement for gitcliff-config-nick2bad4u
 title: "Feature: "
 labels:
  - enhancement
@@ -18,9 +18,9 @@ assignees: []
 
 ## Scope
 
-- Type: New rule / Rule enhancement / Config preset / Docs / Tooling
-- Affected rule IDs (if any):
-- Requires type checking?: Yes / No / Unsure
+- Type: Changelog template / Commit parser / Package metadata / Docs / Tooling
+- Affected changelog section or script:
+- Requires git-cliff changes?: Yes / No / Unsure
 
 ## Alternatives considered
 
@@ -40,7 +40,7 @@ assignees: []
 
 ## Acceptance criteria
 
-- [ ] Clear, actionable diagnostic message(s)
-- [ ] Safe autofix or suggestion behavior defined
-- [ ] Test coverage plan (valid/invalid/edge/fixer)
-- [ ] Documentation impact identified (`docs/rules/<rule-id>.md` if rule-related)
+- [ ] Clear changelog output expectation
+- [ ] Repository-detection behavior considered
+- [ ] Test or preview coverage plan
+- [ ] Documentation impact identified

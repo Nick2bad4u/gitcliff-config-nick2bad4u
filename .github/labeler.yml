@@ -10,7 +10,7 @@
 # -----------------------------------------------------------------------------
 # Bootstrap labels (GitHub CLI)
 # -----------------------------------------------------------------------------
-# Sync-GitHub-Label.ps1 -SourceRepo "Nick2bad4u/nick2bad4u-repo-template"
+# Sync-GitHub-Label.ps1 -SourceRepo "Nick2bad4u/gitcliff-config-nick2bad4u"
 # Script is in: $PSScriptRoot\Sync-GitHub-Label.ps1
 # =============================================================================
 CI/CD:

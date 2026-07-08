@@ -1,22 +1,21 @@
 {
     "$schema": "https://www.schemastore.org/package.json",
-    "name": "nick2bad4u-repo-template",
+    "name": "gitcliff-config-nick2bad4u",
     "version": "0.1.0",
-    "private": true,
-    "description": "Reusable starter repository for Nick2bad4u TypeScript/npm projects.",
+    "description": "Shared git-cliff changelog configuration for Nick2bad4u repositories.",
     "keywords": [
-        "github-template",
-        "typescript",
-        "npm",
-        "tooling"
+        "changelog",
+        "configuration",
+        "conventional-commits",
+        "git-cliff"
     ],
-    "homepage": "https://github.com/Nick2bad4u/nick2bad4u-repo-template",
+    "homepage": "https://github.com/Nick2bad4u/gitcliff-config-nick2bad4u#readme",
     "bugs": {
-        "url": "https://github.com/Nick2bad4u/nick2bad4u-repo-template/issues"
+        "url": "https://github.com/Nick2bad4u/gitcliff-config-nick2bad4u/issues"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Nick2bad4u/nick2bad4u-repo-template.git"
+        "url": "git+https://github.com/Nick2bad4u/gitcliff-config-nick2bad4u.git"
     },
     "license": "MIT",
     "author": "Nick2bad4u <20943337+Nick2bad4u@users.noreply.github.com> (https://github.com/Nick2bad4u)",
@@ -26,12 +25,14 @@
     "type": "module",
     "exports": {
         ".": {
-            "types": "./dist/tooling-baseline.d.ts",
-            "default": "./dist/tooling-baseline.js"
-        }
+            "types": "./dist/gitcliff-config.d.ts",
+            "default": "./dist/gitcliff-config.js"
+        },
+        "./package.json": "./package.json"
     },
-    "types": "./dist/tooling-baseline.d.ts",
+    "types": "./dist/gitcliff-config.d.ts",
     "files": [
+        "cliff.toml",
         "dist",
         "src",
         "README.md",
@@ -41,9 +42,9 @@
         "build": "tsc -p tsconfig.build.json",
         "build:runtime": "npm run build",
         "build:watch": "npm run build -- --watch",
-        "changelog:generate": "npx git-cliff --config cliff.toml --output CHANGELOG.md",
-        "changelog:preview": "npx git-cliff --config cliff.toml --unreleased",
-        "changelog:release-notes": "npx git-cliff --config cliff.toml --current --strip all",
+        "changelog:generate": "git cliff --config cliff.toml --github-repo Nick2bad4u/gitcliff-config-nick2bad4u --output CHANGELOG.md",
+        "changelog:preview": "git cliff --config cliff.toml --github-repo Nick2bad4u/gitcliff-config-nick2bad4u --unreleased",
+        "changelog:release-notes": "git cliff --config cliff.toml --github-repo Nick2bad4u/gitcliff-config-nick2bad4u --current",
         "coverage": "vitest run --coverage",
         "lint": "cross-env NODE_OPTIONS=--max_old_space_size=8192 eslint . --cache --cache-strategy content --cache-location .cache/.eslintcache",
         "lint:actions": "actionlint -config-file actionlint.yml",
@@ -75,7 +76,6 @@
         "package:check": "npm pack --dry-run",
         "release:check": "npm run release:verify",
         "release:verify": "npm run sync:node-version-files:check && npm run build && npm run lint:all && npm run test:coverage && npm run lint:package-check",
-        "setup:template": "node scripts/setup-template.mjs",
         "sync:node-version-files": "node scripts/sync-node-version-files.mjs",
         "sync:node-version-files:check": "node scripts/sync-node-version-files.mjs --check",
         "test": "vitest run",
@@ -122,6 +122,9 @@
         "vite": "^8.1.3",
         "vitest": "^4.1.10",
         "yamllint-config-nick2bad4u": "^1.1.1"
+    },
+    "peerDependencies": {
+        "git-cliff": "^2.10.0"
     },
     "packageManager": "npm@11.18.0",
     "engines": {

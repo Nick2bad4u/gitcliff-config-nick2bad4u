@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a reproducible bug in nick2bad4u-repo-template
+about: Report a reproducible bug in gitcliff-config-nick2bad4u
 title: "Bug: "
 labels:
  - bug
@@ -53,7 +53,7 @@ assignees: []
 - ESLint version:
 - TypeScript version:
 - `@typescript-eslint/*` version:
-- `nick2bad4u-repo-template` version/commit:
+- `gitcliff-config-nick2bad4u` version/commit:
 - OS:
 
 ## Additional context

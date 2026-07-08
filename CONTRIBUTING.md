@@ -4,7 +4,7 @@
 
 ```bash
 npm ci
-npm run setup:template -- --name my-package --description "Package description"
+npm run changelog:preview
 ```
 
 ## Before Opening A Pull Request

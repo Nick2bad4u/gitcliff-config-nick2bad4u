@@ -263,8 +263,9 @@ const isCiEnvironment = process.env["CI"] === "true",
                 json: "./coverage/test-results.json",
             },
             // Unicorn v71 pulls in `web-worker`, which assumes it owns worker_threads.workerData.
-            // Vitest's thread pool also uses workerData, so run tests in child processes.
-            pool: "forks",
+            // Vitest's thread pool also uses workerData, so run normal tests in child processes.
+            // V8 coverage writes shared temp files more reliably through a bounded threads pool.
+            pool: isCoverageRun ? "threads" : "forks",
             printConsoleTrace: false, // Disable stack trace printing for cleaner output
             // Improve test output
             reporters: vitestReporters,

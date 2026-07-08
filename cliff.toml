@@ -29,9 +29,17 @@ All notable changes to this project will be documented in this file.\n
 {% else %}\
   ## [Unreleased]
 {% endif %}
-{% if commit_range and commit_range.from and commit_range.to %}
+{% if commit_range and commit_range.from and commit_range.to %}\
+{% set commit_range_base = commit_range.from %}\
+{% set commit_range_target = commit_range.to %}\
+{% if previous and previous.version %}\
+{% set commit_range_base = previous.version %}\
+{% endif %}\
+{% if version %}\
+{% set commit_range_target = version %}\
+{% endif %}\
   - <b>Commit Range: ➡️</b> \
-  [`{{ commit_range.from | truncate(length=7, end="") }}...{{ commit_range.to | truncate(length=7, end="") }}`](https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}/compare/{{ commit_range.from }}...{{ commit_range.to }} "View full commit range on GitHub")
+  [`{{ commit_range_base | truncate(length=7, end="") }}...{{ commit_range_target | truncate(length=7, end="") }}`](https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}/compare/{{ commit_range_base }}...{{ commit_range_target }} "View full commit range on GitHub")
 {% endif %}
 {% if bump_type == "major" %}
   > ⚠️ **Major release:** this version may contain breaking changes. Review upgrade notes carefully.

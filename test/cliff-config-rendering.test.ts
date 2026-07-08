@@ -195,4 +195,60 @@ describe("cliff.toml", () => {
             await rm(repoPath, { force: true, recursive: true });
         }
     }, 60_000);
+
+    it("uses the previous release as the GitHub compare base", async () => {
+        expect.assertions(2);
+
+        const repoPath = await mkdtemp(path.join(tmpdir(), "gitcliff-config-"));
+
+        try {
+            await initializeRepository(repoPath);
+            await commitFixture(
+                repoPath,
+                "release.txt",
+                "chore: initial release",
+                "release\n"
+            );
+            await run(
+                "git",
+                [
+                    "tag",
+                    "--no-sign",
+                    "v1.0.0",
+                ],
+                repoPath
+            );
+            await commitFixture(
+                repoPath,
+                "fix.txt",
+                "🐛 [fix] keep compare link complete",
+                "fix\n"
+            );
+
+            const headSha = (
+                await run("git", ["rev-parse", "HEAD"], repoPath)
+            ).trim();
+            const changelog = await run(
+                process.execPath,
+                [
+                    gitCliffCliPath,
+                    "--config",
+                    cliffConfigPath,
+                    "--github-repo",
+                    "Nick2bad4u/example-package",
+                    "--unreleased",
+                ],
+                repoPath
+            );
+
+            expect(changelog).toContain(
+                `/compare/v1.0.0...${headSha} "View full commit range on GitHub"`
+            );
+            expect(changelog).not.toContain(
+                `/compare/${headSha}...${headSha} "View full commit range on GitHub"`
+            );
+        } finally {
+            await rm(repoPath, { force: true, recursive: true });
+        }
+    }, 60_000);
 });

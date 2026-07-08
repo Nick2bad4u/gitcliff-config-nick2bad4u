@@ -1,7 +1,7 @@
 blank_issues_enabled: false
 contact_links:
     - name: "Questions and support"
-      url: "https://github.com/Nick2bad4u/gitcliff-config-nick2bad4u/discussions"
+      url: "https://github.com/Nick2bad4u/gitcliff-config-nick2bad4u/issues/new/choose"
       about: "Ask usage, migration, configuration, or troubleshooting questions."
     - name: "Security reports"
       url: "https://github.com/Nick2bad4u/gitcliff-config-nick2bad4u/security/policy"

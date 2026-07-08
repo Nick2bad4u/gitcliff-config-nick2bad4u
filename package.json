@@ -55,6 +55,8 @@
         "lint:fix": "npm run lint -- --fix",
         "lint:gitleaks": "gitleaks dir --config .gitleaks.toml .",
         "lint:jscpd": "jscpd --config node_modules/jscpd-config-nick2bad4u/jscpd.json",
+        "lint:lychee": "lychee --config node_modules/lychee-config-nick2bad4u/lychee.toml .",
+        "lint:lychee:smoke": "lychee --config node_modules/lychee-config-nick2bad4u/lychee.toml --dump-inputs README.md",
         "lint:node-config": "node -e \"JSON.parse(require('node:fs').readFileSync('node.config.json','utf8')); console.log('node.config.json ok')\"",
         "lint:package": "npm run lint:package-sort && npm run lint:package-json && npm run lint:package-check",
         "lint:package:fix": "sort-package-json package.json",
@@ -86,9 +88,7 @@
         "update-actions": "actions-up --yes --style sha",
         "update-all": "npm run update-actions && npm run update-deps",
         "update-deps": "npx ncu -u --install never && npm update --force && npm install --force && npm run sync:node-version-files",
-        "verify": "npm run release:verify",
-        "lint:lychee": "lychee --config node_modules/lychee-config-nick2bad4u/lychee.toml .",
-        "lint:lychee:smoke": "lychee --config node_modules/lychee-config-nick2bad4u/lychee.toml --dump-inputs README.md"
+        "verify": "npm run release:verify"
     },
     "overrides": {
         "esbuild": "0.28.1"

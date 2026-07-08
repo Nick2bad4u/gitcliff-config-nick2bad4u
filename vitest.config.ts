@@ -10,9 +10,17 @@ import {
 
 /** `true` when running under CI where worker parallelism should be bounded. */
 const isCiEnvironment = process.env["CI"] === "true",
+    /** `true` when collecting V8 coverage, which writes shared temporary files. */
+    isCoverageRun =
+        process.env["COVERAGE"] === "true" ||
+        process.argv.some(
+            (argument) =>
+                argument === "--coverage" || argument.startsWith("--coverage.")
+        ),
     /** Raw worker-count input from environment or CI/local defaults. */
     configuredMaxWorkers =
-        process.env["MAX_THREADS"] ?? (isCiEnvironment ? "1" : "8"),
+        process.env["MAX_THREADS"] ??
+        (isCiEnvironment || isCoverageRun ? "1" : "8"),
     /** Parsed integer worker count prior to validation. */
     parsedMaxWorkers = Math.trunc(Number(configuredMaxWorkers)),
     /** Safe positive worker-count used by Vitest thread pool settings. */
@@ -234,7 +242,7 @@ const isCiEnvironment = process.env["CI"] === "true",
             },
             // Always run test files in parallel locally for speed.
             // CI disables file-level parallelism for deterministic resource usage.
-            fileParallelism: !isCiEnvironment,
+            fileParallelism: !isCiEnvironment && !isCoverageRun,
             globals: false,
             hookTimeout: 10_000, // Set hook timeout to 10 seconds
             include: [...testFilePatterns],

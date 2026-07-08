@@ -158,7 +158,7 @@ describe("cliff.toml", () => {
                 "commits included in this release."
             );
             expect(changelog).toContain(
-                "https://github.com/Nick2bad4u/example-package/commit/"
+                "github.com/Nick2bad4u/example-package/commit/"
             );
             expect(hasOnlyPlainDiffTitle(changelog)).toBe(true);
             expect(changelog).toContain("### ✨ Features");

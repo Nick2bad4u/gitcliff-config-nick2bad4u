@@ -119,6 +119,9 @@ jobs:
                   echo "${HOME}/go/bin" >> "${GITHUB_PATH}"
                   "${HOME}/go/bin/gitleaks" version
 
+            - name: "Install Lychee"
+              run: "scripts/install-lychee-linux.sh"
+
             - name: "Install dependencies"
               run: "npm ci --force"
 

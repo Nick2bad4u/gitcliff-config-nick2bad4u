@@ -1,7 +1,7 @@
 {
     "$schema": "https://www.schemastore.org/package.json",
     "name": "gitcliff-config-nick2bad4u",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "description": "Shared git-cliff changelog configuration for Nick2bad4u repositories.",
     "keywords": [
         "changelog",

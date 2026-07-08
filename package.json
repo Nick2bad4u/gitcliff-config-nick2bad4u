@@ -48,7 +48,7 @@
         "coverage": "vitest run --coverage",
         "lint": "cross-env NODE_OPTIONS=--max_old_space_size=8192 eslint . --cache --cache-strategy content --cache-location .cache/.eslintcache",
         "lint:actions": "actionlint -config-file actionlint.yml",
-        "lint:all": "npm run lint && npm run typecheck && npm run test && npm run lint:prettier && npm run lint:package && npm run lint:remark && npm run lint:yaml && npm run lint:config && npm run lint:gitleaks && npm run lint:lychee && npm run lint:secretlint",
+        "lint:all": "npm run lint && npm run typecheck && npm run test && npm run lint:prettier && npm run lint:package && npm run lint:remark && npm run lint:yaml && npm run lint:config && npm run lint:gitleaks && npm run lint:secretlint",
         "lint:all:fix": "npm run lint:fix && npm run lint:prettier:fix && npm run lint:package:fix && npm run lint:remark:fix && npm run lint:yaml:fix && npm run lint:style:fix && npm run typecheck && npm run test",
         "lint:attw": "attw --pack . --profile esm-only",
         "lint:config": "npm run lint:node-config && npm run lint:tsdoc && npm run lint:jscpd",

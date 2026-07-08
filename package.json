@@ -39,9 +39,9 @@
         "LICENSE"
     ],
     "scripts": {
-        "build": "tsc -p tsconfig.build.json",
+        "build": "tsc -b tsconfig.build.json --force",
         "build:runtime": "npm run build",
-        "build:watch": "npm run build -- --watch",
+        "build:watch": "tsc -b tsconfig.build.json --watch",
         "changelog:generate": "git cliff --config cliff.toml --github-repo Nick2bad4u/gitcliff-config-nick2bad4u --output CHANGELOG.md",
         "changelog:preview": "git cliff --config cliff.toml --github-repo Nick2bad4u/gitcliff-config-nick2bad4u --unreleased",
         "changelog:release-notes": "git cliff --config cliff.toml --github-repo Nick2bad4u/gitcliff-config-nick2bad4u --current",
@@ -87,6 +87,9 @@
         "update-all": "npm run update-actions && npm run update-deps",
         "update-deps": "npx ncu -u --install never && npm update --force && npm install --force && npm run sync:node-version-files",
         "verify": "npm run release:verify"
+    },
+    "overrides": {
+        "esbuild": "0.28.1"
     },
     "devDependencies": {
         "@arethetypeswrong/cli": "^0.18.4",

@@ -1,4 +1,6 @@
 description: "Shared git-cliff changelog configuration for Nick2bad4u repositories."
+exclude:
+    - "docs/TERA_TEMPLATING_GUIDE.md"
 plugins:
     - "jekyll-sitemap"
     - "jekyll-seo-tag"

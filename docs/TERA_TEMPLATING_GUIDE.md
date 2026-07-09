@@ -1,7 +1,5 @@
 # Git-Cliff Tera Templating Guide
 
-<!-- {% raw %} -->
-
 This guide is scoped to how this package uses Tera inside `git-cliff`.
 It is not a general Tera, Rust, Zola, or web templating reference.
 
@@ -264,5 +262,3 @@ Keep these release-note details in the template:
 3. Run `npm run changelog:preview` if the change touches GitHub metadata.
 4. Run `npm test -- --run test/cliff-config-rendering.test.ts`.
 5. Run `npm run lint:remark` if documentation changed.
-
-<!-- {% endraw %} -->

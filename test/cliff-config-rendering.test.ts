@@ -209,7 +209,7 @@ describe("cliff.toml", () => {
             expectValidGeneratedMarkdown(changelog);
 
             expect(changelog).toMatch(
-                /## What's Changed(?! in)[\s\S]*github\.com\/Nick2bad4u\/example-package\/commit\//v
+                /## ✨ What's Changed(?! in)[\s\S]*github\.com\/Nick2bad4u\/example-package\/commit\//v
             );
             expect(changelog).not.toMatch(
                 /## \[Unreleased\]|### Commit Statistics|commits included in this release\./v
@@ -230,7 +230,11 @@ describe("cliff.toml", () => {
                 /<sub><em>\(\d+ files?, \+\d+, -\d+\)<\/em><\/sub>/v
             );
             expect(changelog).not.toMatch(/<\/?del>/v);
-            expect(changelog).not.toContain("**Full Changelog**");
+            expect(
+                ["**Full Changelog**", "**Release comparison**"].every(
+                    (label) => !changelog.includes(label)
+                )
+            ).toBe(true);
 
             const documentationSubjectIndex = changelog.indexOf(
                 "Explain shared config <sub><em>"
@@ -315,8 +319,8 @@ describe("cliff.toml", () => {
         }
     }, 60_000);
 
-    it("renders GitHub-style full changelog links for tagged releases", async () => {
-        expect.assertions(12);
+    it("renders a GitHub-style release comparison note for tagged releases", async () => {
+        expect.assertions(13);
 
         const repoPath = await mkdtemp(path.join(tmpdir(), "gitcliff-config-"));
 
@@ -369,17 +373,20 @@ describe("cliff.toml", () => {
 
             expectValidGeneratedMarkdown(changelog);
 
-            expect(changelog).toContain("# Changelog");
-            expect(changelog).toContain(
+            expect(changelog).toContain("# 📜 Changelog");
+            expect(changelog).not.toContain(
                 "All notable changes to this project will be documented in this file."
             );
-            expect(changelog).toContain("## What's Changed in v1.1.0");
+            expect(changelog).toContain("## ✨ What's Changed in v1.1.0");
             expect(changelog).toContain(
-                "**Full Changelog**: https://github.com/Nick2bad4u/example-package/compare/v1.0.0...v1.1.0"
+                "> [!NOTE]\n> **Release comparison**: https://github.com/Nick2bad4u/example-package/compare/v1.0.0...v1.1.0"
             );
             expect(changelog).toContain("## ⭐ Contributors");
             expect(changelog).toContain(
-                "*This changelog was automatically generated with [git-cliff]"
+                "Thanks to anyone who has 🧑‍💻 [contributed](https://github.com/Nick2bad4u/example-package/graphs/contributors)."
+            );
+            expect(changelog).toContain(
+                "*This changelog was automatically generated with ⛰️ [git-cliff]"
             );
             expect(changelog).not.toContain("Project License");
         } finally {
@@ -426,7 +433,7 @@ describe("cliff.toml", () => {
 
             expectValidGeneratedMarkdown(changelog);
 
-            expect(changelog).toContain("## What's Changed");
+            expect(changelog).toContain("## ✨ What's Changed");
             expect(changelog).toContain("add consumer shared config smoke");
             expect(changelog).toContain(
                 "https://github.com/Nick2bad4u/consumer-package/commit/"

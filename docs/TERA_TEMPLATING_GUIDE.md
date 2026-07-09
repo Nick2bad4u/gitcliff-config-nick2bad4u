@@ -99,9 +99,9 @@ Use `if`, `elif`, and `else` to handle released vs unreleased output:
 
 ```tera
 {% if version %}
-  ## What's Changed in {{ version }}
+  ## ✨ What's Changed in {{ version }}
 {% else %}
-  ## What's Changed
+  ## ✨ What's Changed
 {% endif %}
 ```
 
@@ -109,7 +109,8 @@ Guard optional nested values before using them:
 
 ```tera
 {% if previous and previous.version %}
-  **Full Changelog**: {{ self::remote_url() }}/compare/{{ previous.version }}...{{ version }}
+  > [!NOTE]
+  > **Release comparison**: {{ self::remote_url() }}/compare/{{ previous.version }}...{{ version }}
 {% endif %}
 ```
 
@@ -187,9 +188,9 @@ Example:
 
 ```tera
 {% if version %}\
-  ## What's Changed in {{ version }}
+  ## ✨ What's Changed in {{ version }}
 {% else %}\
-  ## What's Changed
+  ## ✨ What's Changed
 {% endif %}
 ```
 
@@ -233,11 +234,11 @@ section from `changelog:release-notes`.
 
 Keep these release-note details in the template:
 
-- GitHub-style `## What's Changed` headings.
+- GitHub-style `## ✨ What's Changed` headings.
 - Grouped commit sections.
 - Per-commit links and compact diff statistics.
 - Optional first-time contributor section.
-- Full changelog compare link for tagged releases.
+- Release comparison note for tagged releases.
 - Footer attribution to git-cliff.
 
 ## Common Failure Modes

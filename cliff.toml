@@ -18,16 +18,15 @@ version = "1.0.1"
     header                   = """
 <!-- markdownlint-disable -->
 <!-- eslint-disable markdown/no-missing-label-refs -->
-# Changelog\n
-All notable changes to this project will be documented in this file.\n
+# 📜 Changelog\n
 """
     # template for the changelog body
     # https://keats.github.io/tera/
     body                     = """
 {% if version %}\
-  ## What's Changed in {{ version }}
+  ## ✨ What's Changed in {{ version }}
 {% else %}\
-  ## What's Changed
+  ## ✨ What's Changed
 {% endif %}
 {% if commit_range and commit_range.from and commit_range.to %}\
 {% set commit_range_base = commit_range.from %}\
@@ -97,7 +96,8 @@ All notable changes to this project will be documented in this file.\n
 {%- endif -%}
 {% if version %}
   {% if previous and previous.version %}
-    **Full Changelog**: {{ self::remote_url() }}/compare/{{ previous.version }}...{{ version }}
+    > [!NOTE]
+    > **Release comparison**: {{ self::remote_url() }}/compare/{{ previous.version }}...{{ version }}
   {% endif %}
 {% else -%}
   {% raw %}\n{% endraw %}
@@ -113,8 +113,9 @@ All notable changes to this project will be documented in this file.\n
     # template for the changelog footer
     footer                   = """
 ## ⭐ Contributors
-Thanks to all the [contributors]({{ self::remote_url() }}/graphs/contributors) for their hard work!
-*This changelog was automatically generated with [git-cliff](https://github.com/orhun/git-cliff).*
+Thanks to anyone who has 🧑‍💻 [contributed]({{ self::remote_url() }}/graphs/contributors).
+
+*This changelog was automatically generated with ⛰️ [git-cliff](https://github.com/orhun/git-cliff).*
 {%- macro remote_url() -%}
   https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}
 {%- endmacro -%}

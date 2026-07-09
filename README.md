@@ -35,7 +35,7 @@ Do not pass `--strip all` for release notes. The shared release-notes command in
 
 ## GitHub Metadata
 
-The template renders GitHub-style release sections, full compare links, PR links, and first-time contributors. PR and contributor data requires git-cliff's GitHub integration, so keep release generation online and set `GITHUB_TOKEN` in CI to avoid unauthenticated rate limits.
+The template renders GitHub-style release sections, release comparison notes, PR links, and first-time contributors. PR and contributor data requires git-cliff's GitHub integration, so keep release generation online and set `GITHUB_TOKEN` in CI to avoid unauthenticated rate limits.
 
 Use `--offline` for deterministic local previews or template validation. Offline renders still validate the Tera template and repository links, but GitHub-only data such as first-time contributors is omitted.
 

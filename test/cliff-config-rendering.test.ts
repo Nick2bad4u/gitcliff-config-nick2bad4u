@@ -1,31 +1,52 @@
 import { execFile } from "node:child_process";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
+import { remark } from "remark";
 import { describe, expect, it } from "vitest";
 
 const repositoryRoot = path.dirname(import.meta.dirname);
 const cliffConfigPath = path.join(repositoryRoot, "cliff.toml");
 const gitCliffCliPath = fileURLToPath(import.meta.resolve("git-cliff/cli"));
 
+interface RunOptions {
+    readonly env?: NodeJS.ProcessEnv;
+}
+
 const run = async (
     command: string,
     args: readonly string[],
-    cwd: string
+    cwd: string,
+    options: RunOptions = {}
 ): Promise<string> =>
     new Promise((resolve, reject) => {
+        const execOptions =
+            options.env === undefined
+                ? { cwd, encoding: "utf8" as const }
+                : { cwd, encoding: "utf8" as const, env: options.env };
         const childProcess = execFile(
             command,
             [...args],
-            { cwd, encoding: "utf8" },
+            execOptions,
             (error, stdout, stderr) => {
                 if (error) {
-                    reject(new Error(error.message, { cause: error }));
+                    reject(
+                        new Error(
+                            [
+                                error.message,
+                                stdout,
+                                stderr,
+                            ]
+                                .filter(Boolean)
+                                .join("\n"),
+                            { cause: error }
+                        )
+                    );
                     return;
                 }
 
-                resolve(`${stdout}${stderr}`);
+                resolve(stdout);
             }
         );
 
@@ -65,6 +86,16 @@ const countOccurrences = (text: string, searchValue: string): number =>
 const hasOnlyPlainDiffTitle = (text: string): boolean =>
     text.includes('"Diff: ') && !text.includes('"📝 Diff: ');
 
+const expectValidGeneratedMarkdown = (changelog: string): void => {
+    const parsedMarkdown = remark().parse(changelog);
+
+    expect(parsedMarkdown.type).toBe("root");
+    expect(changelog).not.toMatch(/(?:\{%|%\}|\{\{|\}\}|\{#|#\})/v);
+    expect(changelog).not.toMatch(/\b(?:NaN|null|undefined)\b/v);
+    expect(changelog).not.toMatch(/^###\s*$/mv);
+    expect(changelog).not.toMatch(/<!--\s*\d+\s*-->/v);
+};
+
 const isOrderedRenderedSubjectAndBody = (
     subjectIndex: number,
     bodyIndex: number
@@ -93,9 +124,31 @@ const initializeRepository = async (repoPath: string): Promise<void> => {
     );
 };
 
+const installSharedConfigFixture = async (
+    repoPath: string
+): Promise<string> => {
+    const sharedConfigDirectory = path.join(
+        repoPath,
+        "node_modules",
+        "gitcliff-config-nick2bad4u"
+    );
+
+    await mkdir(sharedConfigDirectory, { recursive: true });
+    await copyFile(
+        cliffConfigPath,
+        path.join(sharedConfigDirectory, "cliff.toml")
+    );
+
+    return path.join(
+        "node_modules",
+        "gitcliff-config-nick2bad4u",
+        "cliff.toml"
+    );
+};
+
 describe("cliff.toml", () => {
     it("renders repo-specific links, parser groups, dependency cleanup, and compact commit statistics", async () => {
-        expect.assertions(16);
+        expect.assertions(22);
 
         const repoPath = await mkdtemp(path.join(tmpdir(), "gitcliff-config-"));
 
@@ -153,6 +206,8 @@ describe("cliff.toml", () => {
                 repoPath
             );
 
+            expectValidGeneratedMarkdown(changelog);
+
             expect(changelog).toMatch(
                 /## What's Changed(?! in)[\s\S]*github\.com\/Nick2bad4u\/example-package\/commit\//v
             );
@@ -196,6 +251,7 @@ describe("cliff.toml", () => {
             expect(countOccurrences(changelog, "<sub><em>(")).toBe(6);
             expect(countOccurrences(changelog, "stats:")).toBe(0);
             expect(changelog).toContain("## ⭐ Contributors");
+            expect(changelog).not.toContain("### New Contributors");
             expect(changelog).not.toMatch(/## 📜 License|Project License/v);
         } finally {
             await rm(repoPath, { force: true, recursive: true });
@@ -260,7 +316,7 @@ describe("cliff.toml", () => {
     }, 60_000);
 
     it("renders GitHub-style full changelog links for tagged releases", async () => {
-        expect.assertions(3);
+        expect.assertions(12);
 
         const repoPath = await mkdtemp(path.join(tmpdir(), "gitcliff-config-"));
 
@@ -311,11 +367,76 @@ describe("cliff.toml", () => {
                 repoPath
             );
 
+            expectValidGeneratedMarkdown(changelog);
+
+            expect(changelog).toContain("# Changelog");
+            expect(changelog).toContain(
+                "All notable changes to this project will be documented in this file."
+            );
             expect(changelog).toContain("## What's Changed in v1.1.0");
             expect(changelog).toContain(
                 "**Full Changelog**: https://github.com/Nick2bad4u/example-package/compare/v1.0.0...v1.1.0"
             );
+            expect(changelog).toContain("## ⭐ Contributors");
+            expect(changelog).toContain(
+                "*This changelog was automatically generated with [git-cliff]"
+            );
             expect(changelog).not.toContain("Project License");
+        } finally {
+            await rm(repoPath, { force: true, recursive: true });
+        }
+    }, 60_000);
+
+    it("renders from a node_modules shared config path with GITHUB_REPO", async () => {
+        expect.assertions(10);
+
+        const repoPath = await mkdtemp(path.join(tmpdir(), "gitcliff-config-"));
+
+        try {
+            await initializeRepository(repoPath);
+            const sharedConfigPath = await installSharedConfigFixture(repoPath);
+
+            await commitFixture(
+                repoPath,
+                "consumer.txt",
+                "✨ [feat] add consumer shared config smoke",
+                "consumer\n"
+            );
+
+            const githubRepositoryEnvironment = {
+                // eslint-disable-next-line n/no-process-env -- Preserve PATH and Git environment while overriding only GITHUB_REPO for this child process.
+                ...process.env,
+                GITHUB_REPO: "Nick2bad4u/consumer-package",
+            };
+
+            const changelog = await run(
+                process.execPath,
+                [
+                    gitCliffCliPath,
+                    "--config",
+                    sharedConfigPath,
+                    "--unreleased",
+                    "--offline",
+                ],
+                repoPath,
+                {
+                    env: githubRepositoryEnvironment,
+                }
+            );
+
+            expectValidGeneratedMarkdown(changelog);
+
+            expect(changelog).toContain("## What's Changed");
+            expect(changelog).toContain("add consumer shared config smoke");
+            expect(changelog).toContain(
+                "https://github.com/Nick2bad4u/consumer-package/commit/"
+            );
+            expect(changelog).toContain(
+                "https://github.com/Nick2bad4u/consumer-package/graphs/contributors"
+            );
+            expect(changelog).not.toContain(
+                "Nick2bad4u/gitcliff-config-nick2bad4u/commit"
+            );
         } finally {
             await rm(repoPath, { force: true, recursive: true });
         }

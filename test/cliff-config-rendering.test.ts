@@ -95,7 +95,7 @@ const initializeRepository = async (repoPath: string): Promise<void> => {
 
 describe("cliff.toml", () => {
     it("renders repo-specific links, parser groups, dependency cleanup, and compact commit statistics", async () => {
-        expect.assertions(19);
+        expect.assertions(16);
 
         const repoPath = await mkdtemp(path.join(tmpdir(), "gitcliff-config-"));
 
@@ -148,29 +148,34 @@ describe("cliff.toml", () => {
                     "--github-repo",
                     "Nick2bad4u/example-package",
                     "--unreleased",
+                    "--offline",
                 ],
                 repoPath
             );
 
-            expect(changelog).toContain("## [Unreleased]");
-            expect(changelog).not.toContain("### Commit Statistics");
-            expect(changelog).not.toContain(
-                "commits included in this release."
+            expect(changelog).toMatch(
+                /## What's Changed(?! in)[\s\S]*github\.com\/Nick2bad4u\/example-package\/commit\//v
             );
-            expect(changelog).toContain(
-                "github.com/Nick2bad4u/example-package/commit/"
+            expect(changelog).not.toMatch(
+                /## \[Unreleased\]|### Commit Statistics|commits included in this release\./v
             );
             expect(hasOnlyPlainDiffTitle(changelog)).toBe(true);
-            expect(changelog).toContain("### ✨ Features");
-            expect(changelog).toContain("### 🛠️ Bug Fixes");
-            expect(changelog).toContain("### 📝 Documentation");
-            expect(changelog).toContain("### 📦 Dependencies");
-            expect(changelog).toContain("### 🛠️ Other Changes");
+            expect(
+                [
+                    "### ✨ Features",
+                    "### 🛠️ Bug Fixes",
+                    "### 📝 Documentation",
+                    "### 📦 Dependencies",
+                    "### 🛠️ Other Changes",
+                ].every((group) => changelog.includes(group))
+            ).toBe(true);
             expect(changelog).toContain("[dependency] Update lodash");
             expect(changelog).not.toContain("[dependency] test");
             expect(changelog).toMatch(
-                /<sub><em>\(\d+ files?, <ins>\+\d+<\/ins>, <del>-\d+<\/del>\)<\/em><\/sub>/v
+                /<sub><em>\(\d+ files?, \+\d+, -\d+\)<\/em><\/sub>/v
             );
+            expect(changelog).not.toMatch(/<\/?del>/v);
+            expect(changelog).not.toContain("**Full Changelog**");
 
             const documentationSubjectIndex = changelog.indexOf(
                 "Explain shared config <sub><em>"
@@ -191,6 +196,7 @@ describe("cliff.toml", () => {
             expect(countOccurrences(changelog, "<sub><em>(")).toBe(6);
             expect(countOccurrences(changelog, "stats:")).toBe(0);
             expect(changelog).toContain("## ⭐ Contributors");
+            expect(changelog).not.toMatch(/## 📜 License|Project License/v);
         } finally {
             await rm(repoPath, { force: true, recursive: true });
         }
@@ -237,6 +243,7 @@ describe("cliff.toml", () => {
                     "--github-repo",
                     "Nick2bad4u/example-package",
                     "--unreleased",
+                    "--offline",
                 ],
                 repoPath
             );
@@ -247,6 +254,68 @@ describe("cliff.toml", () => {
             expect(changelog).not.toContain(
                 `/compare/${headSha}...${headSha} "View full commit range on GitHub"`
             );
+        } finally {
+            await rm(repoPath, { force: true, recursive: true });
+        }
+    }, 60_000);
+
+    it("renders GitHub-style full changelog links for tagged releases", async () => {
+        expect.assertions(3);
+
+        const repoPath = await mkdtemp(path.join(tmpdir(), "gitcliff-config-"));
+
+        try {
+            await initializeRepository(repoPath);
+            await commitFixture(
+                repoPath,
+                "release.txt",
+                "chore: initial release",
+                "release\n"
+            );
+            await run(
+                "git",
+                [
+                    "tag",
+                    "--no-sign",
+                    "v1.0.0",
+                ],
+                repoPath
+            );
+            await commitFixture(
+                repoPath,
+                "feature.txt",
+                "✨ [feat] add tagged release notes",
+                "feature\n"
+            );
+            await run(
+                "git",
+                [
+                    "tag",
+                    "--no-sign",
+                    "v1.1.0",
+                ],
+                repoPath
+            );
+
+            const changelog = await run(
+                process.execPath,
+                [
+                    gitCliffCliPath,
+                    "--config",
+                    cliffConfigPath,
+                    "--github-repo",
+                    "Nick2bad4u/example-package",
+                    "--current",
+                    "--offline",
+                ],
+                repoPath
+            );
+
+            expect(changelog).toContain("## What's Changed in v1.1.0");
+            expect(changelog).toContain(
+                "**Full Changelog**: https://github.com/Nick2bad4u/example-package/compare/v1.0.0...v1.1.0"
+            );
+            expect(changelog).not.toContain("Project License");
         } finally {
             await rm(repoPath, { force: true, recursive: true });
         }

@@ -25,9 +25,9 @@ All notable changes to this project will be documented in this file.\n
     # https://keats.github.io/tera/
     body                     = """
 {% if version %}\
-  ## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}
+  ## What's Changed in {{ version }}
 {% else %}\
-  ## [Unreleased]
+  ## What's Changed
 {% endif %}
 {% if commit_range and commit_range.from and commit_range.to %}\
 {% set commit_range_base = commit_range.from %}\
@@ -39,7 +39,7 @@ All notable changes to this project will be documented in this file.\n
 {% set commit_range_target = version %}\
 {% endif %}\
   - <b>Commit Range: ➡️</b> \
-  [`{{ commit_range_base | truncate(length=7, end="") }}...{{ commit_range_target | truncate(length=7, end="") }}`](https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}/compare/{{ commit_range_base }}...{{ commit_range_target }} "View full commit range on GitHub")
+  [`{{ commit_range_base | truncate(length=7, end="") }}...{{ commit_range_target | truncate(length=7, end="") }}`]({{ self::remote_url() }}/compare/{{ commit_range_base }}...{{ commit_range_target }} "View full commit range on GitHub")
 {% endif %}
 {% if bump_type == "major" %}
   > ⚠️ **Major release:** this version may contain breaking changes. Review upgrade notes carefully.
@@ -52,12 +52,12 @@ All notable changes to this project will be documented in this file.\n
   ### {{ group | striptags | trim | upper_first }}
   {% for commit in commits %}
 {% set commit_message_lines = commit.message | split(pat="\n") %}
-    - [`{{ commit.id | truncate(length=7, end="") }}`](https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}/commit/{{ commit.id }} "Diff: {{ commit.statistics.files_changed }} file{% if commit.statistics.files_changed != 1 %}s{% endif %}, ++{{ commit.statistics.additions }} | --{{ commit.statistics.deletions }}") — {% if commit.scope %}*({{ commit.scope }})* {% endif %}\
+    - [`{{ commit.id | truncate(length=7, end="") }}`]({{ self::remote_url() }}/commit/{{ commit.id }} "Diff: {{ commit.statistics.files_changed }} file{% if commit.statistics.files_changed != 1 %}s{% endif %}, +{{ commit.statistics.additions }} | -{{ commit.statistics.deletions }}") — {% if commit.scope %}*({{ commit.scope }})* {% endif %}\
       {% if commit.breaking %}[**breaking**] {% endif %}\
       {{ commit_message_lines | first
           | upper_first
           | replace(from=" - ", to="\n    - ")
-      }} <sub><em>({{ commit.statistics.files_changed }} file{% if commit.statistics.files_changed != 1 %}s{% endif %}, <ins>+{{ commit.statistics.additions }}</ins>, <del>-{{ commit.statistics.deletions }}</del>)</em></sub>
+      }} <sub><em>({{ commit.statistics.files_changed }} file{% if commit.statistics.files_changed != 1 %}s{% endif %}, +{{ commit.statistics.additions }}, -{{ commit.statistics.deletions }})</em></sub>
 {%- for commit_message_line in commit_message_lines %}
 {%- if not loop.first %}
     {{ commit_message_line | replace(from=" - ", to="\n    - ") }}
@@ -75,18 +75,49 @@ All notable changes to this project will be documented in this file.\n
         {% endfor %}
     {% endfor %}
 {% endfor %}\n
+{%- if github -%}
+{% set new_contributor_count = 0 %}
+{% for contributor in github.contributors | filter(attribute="is_first_time", value=true) %}
+  {% if contributor.username %}
+    {% set_global new_contributor_count = new_contributor_count + 1 %}
+  {% endif %}
+{% endfor %}
+{% if new_contributor_count != 0 %}
+  {% raw %}\n{% endraw -%}
+  ### New Contributors
+{%- endif %}\
+{% for contributor in github.contributors | filter(attribute="is_first_time", value=true) %}
+{%- if contributor.username %}
+  * @{{ contributor.username }} made their first contribution\
+    {%- if contributor.pr_number %} in \
+      [#{{ contributor.pr_number }}]({{ self::remote_url() }}/pull/{{ contributor.pr_number }}) \
+    {%- endif %}
+{%- endif %}
+{%- endfor -%}
+{%- endif -%}
+{% if version %}
+  {% if previous and previous.version %}
+    **Full Changelog**: {{ self::remote_url() }}/compare/{{ previous.version }}...{{ version }}
+  {% endif %}
+{% else -%}
+  {% raw %}\n{% endraw %}
+{% endif %}
 {% if commit.footer %}
   <!-- Use the footer directly -->
   {{ commit.footer | trim | indent(width=8) }}
 {% endif %}
+{%- macro remote_url() -%}
+  https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}
+{%- endmacro -%}
 """
     # template for the changelog footer
     footer                   = """
 ## ⭐ Contributors
-Thanks to all the [contributors](https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}/graphs/contributors) for their hard work!
-## 📜 License
-This project license is here: [Project License](https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}/blob/main/LICENSE)
+Thanks to all the [contributors]({{ self::remote_url() }}/graphs/contributors) for their hard work!
 *This changelog was automatically generated with [git-cliff](https://github.com/orhun/git-cliff).*
+{%- macro remote_url() -%}
+  https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}
+{%- endmacro -%}
 """
     # Remove leading and trailing whitespace from the changelog content
     trim                     = true
@@ -227,9 +258,9 @@ This project license is here: [Project License](https://github.com/{{ remote.git
     sort_commits          = "newest"
 
 [remote]
-    # Keep remote metadata lookups disabled by default while still exposing
-    # owner/repo values to the changelog template for reusable link generation.
-    offline = true
+    # Keep GitHub metadata available by default so PR authors and first-time
+    # contributors can render. Use --offline for deterministic local previews.
+    offline = false
 
     # GitHub repository metadata used by the changelog template.
     # Shared-config consumers should set GITHUB_REPO or pass --github-repo

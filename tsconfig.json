@@ -55,7 +55,6 @@
         "noImplicitOverride": true,
         "noImplicitReturns": true,
         "noImplicitThis": true,
-        "noImplicitUseStrict": false,
         "noLib": false,
         "noPropertyAccessFromIndexSignature": true,
         "noResolve": false,

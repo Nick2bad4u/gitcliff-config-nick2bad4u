@@ -14,7 +14,7 @@ The package ships:
 npm install --save-dev gitcliff-config-nick2bad4u git-cliff
 ```
 
-`git-cliff` is a peer dependency because the consuming repository should control its CLI version. Use git-cliff `2.10.0` or newer; this config uses the commit and release statistics fields added in that line.
+`git-cliff` is a peer dependency because the consuming repository should control its CLI version. Use git-cliff `2.10.0` or newer; this config uses the commit statistics and release context fields added in that line.
 
 ## Recommended Scripts
 
@@ -25,12 +25,19 @@ Add these scripts to consuming repositories:
  "scripts": {
   "changelog:generate": "git cliff --config node_modules/gitcliff-config-nick2bad4u/cliff.toml --github-repo Nick2bad4u/my-package --output CHANGELOG.md",
   "changelog:preview": "git cliff --config node_modules/gitcliff-config-nick2bad4u/cliff.toml --github-repo Nick2bad4u/my-package --unreleased",
+  "changelog:preview:offline": "git cliff --config node_modules/gitcliff-config-nick2bad4u/cliff.toml --github-repo Nick2bad4u/my-package --unreleased --offline",
   "changelog:release-notes": "git cliff --config node_modules/gitcliff-config-nick2bad4u/cliff.toml --github-repo Nick2bad4u/my-package --current"
  }
 }
 ```
 
 Do not pass `--strip all` for release notes. The shared release-notes command intentionally emits the full rendered changelog section.
+
+## GitHub Metadata
+
+The template renders GitHub-style release sections, full compare links, PR links, and first-time contributors. PR and contributor data requires git-cliff's GitHub integration, so keep release generation online and set `GITHUB_TOKEN` in CI to avoid unauthenticated rate limits.
+
+Use `--offline` for deterministic local previews or template validation. Offline renders still validate the Tera template and repository links, but GitHub-only data such as first-time contributors is omitted.
 
 ## Repository Links
 
@@ -50,10 +57,21 @@ Then use scripts like:
  "scripts": {
   "changelog:generate": "git cliff --config node_modules/gitcliff-config-nick2bad4u/cliff.toml --output CHANGELOG.md",
   "changelog:preview": "git cliff --config node_modules/gitcliff-config-nick2bad4u/cliff.toml --unreleased",
+  "changelog:preview:offline": "git cliff --config node_modules/gitcliff-config-nick2bad4u/cliff.toml --unreleased --offline",
   "changelog:release-notes": "git cliff --config node_modules/gitcliff-config-nick2bad4u/cliff.toml --current"
  }
 }
 ```
+
+## Template Preview And Validation
+
+git-cliff renders `cliff.toml` with Tera. This package has no separate validator; the practical validation path is rendering a preview:
+
+```bash
+npm run changelog:preview:offline
+```
+
+If the TOML or Tera template is invalid, git-cliff exits non-zero. Use `npm run changelog:preview` when you also want to inspect GitHub PR and first-time contributor metadata.
 
 ## Maintenance
 

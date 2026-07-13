@@ -4,7 +4,7 @@
         "src/gitcliff-config.ts"
     ],
     "extends": [
-        "typedoc-config-nick2bad4u"
+        "typedoc-config-nick2bad4u/typedoc.json"
     ],
     "out": "docs/api"
 }

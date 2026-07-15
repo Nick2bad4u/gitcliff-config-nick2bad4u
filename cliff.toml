@@ -102,10 +102,6 @@ version = "1.0.1"
 {% else -%}
   {% raw %}\n{% endraw %}
 {% endif %}
-{% if commit.footer %}
-  <!-- Use the footer directly -->
-  {{ commit.footer | trim | indent(width=8) }}
-{% endif %}
 {%- macro remote_url() -%}
   https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}
 {%- endmacro -%}
@@ -125,8 +121,8 @@ Thanks to anyone who has 🧑‍💻 [contributed]({{ self::remote_url() }}/grap
     # postprocessors
     postprocessors           = [
         # { pattern = 'your-package-name', replace = "[your-package-name](https://github.com/${remote.github.owner}/${remote.github.repo})" }, # example repository URL replacement
-        { pattern = "Merge branch", replace = "[chore] Merge Branch" },                                                                                                                                                                                                                                                                                                                                  # replace merge branch commit messages
-        { pattern = "merge branch", replace = "[chore] Merge Branch" },                                                                                                                                                                                                                                                                                                                                  # replace merge branch commit messages
+        { pattern = "Merge branch", replace = "[chore] Merge Branch" },                                                                                                                                                                                                                                                                                 # replace merge branch commit messages
+        { pattern = "merge branch", replace = "[chore] Merge Branch" },                                                                                                                                                                                                                                                                                 # replace merge branch commit messages
         # Clean up Dependabot messages - remove verbose table content
         { pattern = 'Bump the.*?group with \d+ updates.*?(\n\n|\|.*?\|.*?\n)*', replace = "[dependency] Update dependency group" },
         { pattern = 'Bumps the npm-all group.*?with \d+ updates.*?(\n\n|\|.*?\|.*?\n)*', replace = "[dependency] Update npm dependencies" },
@@ -136,8 +132,6 @@ Thanks to anyone who has 🧑‍💻 [contributed]({{ self::remote_url() }}/grap
         { pattern = 'Bump ([a-zA-Z0-9@\-\/]+) from.*?to.*?(\n\n.*?)*', replace = "[dependency] Update $1" },
         { pattern = 'Bump ([a-zA-Z0-9@\-\/]+) to.*?(\n\n.*?)*', replace = "[dependency] Update $1" },
         { pattern = 'Bumps \[([^\]]+)\].*?from.*?to.*?(\n\n.*?)*', replace = "[dependency] Update $1" },
-        # Generic bump message cleanup
-        { pattern = "Bump", replace = "[dependency] Update" },
         # Remove git trailers that look noisy in rendered changelog entries
         { pattern = '\n\nSigned-off-by:[^\n\r]*(\r?\nSigned-off-by:[^\n\r]*)*', replace = "" },
     ]

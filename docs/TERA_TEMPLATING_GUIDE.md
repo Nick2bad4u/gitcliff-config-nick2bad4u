@@ -168,7 +168,6 @@ Useful filters in this config:
 - `striptags`: `{{ group | striptags }}`
 - `trim`: `{{ group | trim }}`
 - `upper_first`: `{{ commit.message | upper_first }}`
-- `indent`: `{{ commit.footer | trim | indent(width=8) }}`
 
 Keep filters focused on formatting. Put commit classification in
 `[git].commit_parsers` rather than trying to classify commits in Tera.
@@ -261,5 +260,5 @@ Keep these release-note details in the template:
 1. Edit `cliff.toml`.
 2. Run `npm run changelog:preview:offline`.
 3. Run `npm run changelog:preview` if the change touches GitHub metadata.
-4. Run `npm test -- --run test/cliff-config-rendering.test.ts`.
+4. Run `npm test -- test/cliff-config-rendering.test.ts`.
 5. Run `npm run lint:remark` if documentation changed.

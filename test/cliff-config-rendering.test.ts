@@ -148,7 +148,7 @@ const installSharedConfigFixture = async (
 
 describe("cliff.toml", () => {
     it("renders repo-specific links, parser groups, dependency cleanup, and compact commit statistics", async () => {
-        expect.assertions(22);
+        expect.assertions(23);
 
         const repoPath = await mkdtemp(path.join(tmpdir(), "gitcliff-config-"));
 
@@ -184,6 +184,12 @@ describe("cliff.toml", () => {
                 "lodash.txt",
                 "Bump lodash from 4.17.20 to 4.17.21",
                 "lodash\n"
+            );
+            await commitFixture(
+                repoPath,
+                "bump-docs.txt",
+                "docs: explain Bump version behavior",
+                "bump docs\n"
             );
             await commitFixture(
                 repoPath,
@@ -225,6 +231,7 @@ describe("cliff.toml", () => {
                 ].every((group) => changelog.includes(group))
             ).toBe(true);
             expect(changelog).toContain("[dependency] Update lodash");
+            expect(changelog).toContain("Explain Bump version behavior");
             expect(changelog).not.toContain("[dependency] test");
             expect(changelog).toMatch(
                 /<sub><em>\(\d+ files?, \+\d+, -\d+\)<\/em><\/sub>/v
@@ -252,7 +259,7 @@ describe("cliff.toml", () => {
 
             expect(changelog).not.toContain("_(stats:");
             expect(changelog).not.toContain("Signed-off-by:");
-            expect(countOccurrences(changelog, "<sub><em>(")).toBe(6);
+            expect(countOccurrences(changelog, "<sub><em>(")).toBe(7);
             expect(countOccurrences(changelog, "stats:")).toBe(0);
             expect(changelog).toContain("## ⭐ Contributors");
             expect(changelog).not.toContain("### New Contributors");

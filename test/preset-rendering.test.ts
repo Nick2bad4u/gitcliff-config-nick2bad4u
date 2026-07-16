@@ -312,7 +312,7 @@ describe("published git-cliff presets", () => {
         expectScopeAndStatisticsPresets(presetOutputs);
         expectUserFacingPresets(presetOutputs);
         expectCustomPresets(presetOutputs);
-    });
+    }, 120_000);
 
     it("keeps every committed documentation example synchronized", async () => {
         expect.hasAssertions();

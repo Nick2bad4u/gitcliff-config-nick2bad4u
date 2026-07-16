@@ -396,11 +396,11 @@ const renderPresetOutput = async (repoPath, presetFileName) => {
         "--current",
         "--offline",
     ];
-    const {
-        FORCE_COLOR: _forceColor,
-        NO_COLOR: _noColor,
-        ...parentEnvironment
-    } = process.env;
+    const parentEnvironment = Object.fromEntries(
+        Object.entries(process.env).filter(
+            ([name]) => name !== "FORCE_COLOR" && name !== "NO_COLOR"
+        )
+    );
     const environment = {
         ...parentEnvironment,
         AZURE_DEVOPS_TOKEN: "",

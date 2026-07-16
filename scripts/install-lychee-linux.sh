@@ -18,7 +18,7 @@ curl --fail --location --show-error --silent --output "${checksum_path}" "${base
 expected_checksum="$(cut -d ' ' -f 1 "${checksum_path}")"
 actual_checksum="$(sha256sum "${archive_path}" | cut -d ' ' -f 1)"
 
-if [ "${expected_checksum}" != "${actual_checksum}" ]; then
+if [[ "${expected_checksum}" != "${actual_checksum}" ]]; then
     echo "Lychee checksum mismatch for ${archive_name}." >&2
     echo "Expected: ${expected_checksum}" >&2
     echo "Actual:   ${actual_checksum}" >&2
@@ -28,7 +28,7 @@ fi
 tar -xzf "${archive_path}" -C "${install_dir}"
 lychee_path="$(find "${install_dir}" -type f -name lychee -print -quit)"
 
-if [ -z "${lychee_path}" ]; then
+if [[ -z "${lychee_path}" ]]; then
     echo "Could not find lychee binary in ${archive_name}." >&2
     exit 1
 fi
@@ -36,7 +36,7 @@ fi
 chmod +x "${lychee_path}"
 lychee_bin_dir="$(dirname "${lychee_path}")"
 
-if [ -n "${GITHUB_PATH:-}" ]; then
+if [[ -n "${GITHUB_PATH:-}" ]]; then
     echo "${lychee_bin_dir}" >> "${GITHUB_PATH}"
 fi
 

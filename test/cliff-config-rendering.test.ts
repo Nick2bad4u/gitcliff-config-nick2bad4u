@@ -102,6 +102,21 @@ const isOrderedRenderedSubjectAndBody = (
 ): boolean =>
     subjectIndex !== -1 && bodyIndex !== -1 && subjectIndex < bodyIndex;
 
+const isStrictlyAscending = (values: readonly number[]): boolean =>
+    values.every((value, index) => {
+        const previous = values[index - 1];
+
+        return index === 0 || (previous !== undefined && previous < value);
+    });
+
+const hasOrderedGroups = (text: string, groups: readonly string[]): boolean => {
+    const indexes = groups.map((group) => text.indexOf(group));
+
+    return (
+        indexes.every((index) => index !== -1) && isStrictlyAscending(indexes)
+    );
+};
+
 const initializeRepository = async (repoPath: string): Promise<void> => {
     await run("git", ["init"], repoPath);
     await run(
@@ -148,7 +163,7 @@ const installSharedConfigFixture = async (
 
 describe("cliff.toml", () => {
     it("renders repo-specific links, parser groups, dependency cleanup, and compact commit statistics", async () => {
-        expect.assertions(23);
+        expect.assertions(25);
 
         const repoPath = await mkdtemp(path.join(tmpdir(), "gitcliff-config-"));
 
@@ -222,16 +237,18 @@ describe("cliff.toml", () => {
             );
             expect(hasOnlyPlainDiffTitle(changelog)).toBe(true);
             expect(
-                [
+                hasOrderedGroups(changelog, [
                     "### ✨ Features",
                     "### 🛠️ Bug Fixes",
                     "### 📝 Documentation",
                     "### 📦 Dependencies",
                     "### 🛠️ Other Changes",
-                ].every((group) => changelog.includes(group))
+                ])
             ).toBe(true);
             expect(changelog).toContain("[dependency] Update lodash");
             expect(changelog).toContain("Explain Bump version behavior");
+            expect(changelog).toContain("*(core)* Add renderer");
+            expect(changelog).not.toContain("*(core)* ✨ [feat] (core)");
             expect(changelog).not.toContain("[dependency] test");
             expect(changelog).toMatch(
                 /<sub><em>\(\d+ files?, \+\d+, -\d+\)<\/em><\/sub>/v

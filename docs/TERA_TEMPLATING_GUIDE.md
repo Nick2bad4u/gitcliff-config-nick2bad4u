@@ -3,8 +3,10 @@
 This guide is scoped to how this package uses Tera inside `git-cliff`.
 It is not a general Tera, Rust, Zola, or web templating reference.
 
-The shared config lives in [`cliff.toml`](../cliff.toml). git-cliff renders the
-Tera templates from the `[changelog]` table:
+The default shared config lives in [`cliff.toml`](../cliff.toml). Alternative
+standalone layouts live under [`presets/`](../presets/) and are generated from
+the canonical parser plus style-specific Tera templates. git-cliff renders the
+templates from the `[changelog]` table:
 
 - `header`: rendered once at the top of a generated changelog.
 - `body`: rendered for each release section.
@@ -128,7 +130,7 @@ Loop over grouped commits with `group_by`:
 ```
 
 The parser stores hidden sort markers in group names, such as
-`<!-- 0 -->✨ Features`. Always clean group headings before rendering:
+`<!-- 00 -->✨ Features`. Always clean group headings before rendering:
 
 ```tera
 {{ group | striptags | trim | upper_first }}
@@ -258,7 +260,13 @@ Keep these release-note details in the template:
 ## Minimal Safe Workflow
 
 1. Edit `cliff.toml`.
-2. Run `npm run changelog:preview:offline`.
-3. Run `npm run changelog:preview` if the change touches GitHub metadata.
-4. Run `npm test -- test/cliff-config-rendering.test.ts`.
-5. Run `npm run lint:remark` if documentation changed.
+2. If shared parsing changed, run `npm run presets:generate`.
+3. Run `npm run presets:check`.
+4. Run `npm run changelog:preview:offline`.
+5. Run `npm run changelog:preview` if the change touches GitHub metadata.
+6. Run `npm test -- test/cliff-config-rendering.test.ts test/preset-rendering.test.ts`.
+7. Run `npm run lint:remark` if documentation changed.
+
+Do not edit generated files under `presets/` directly. Edit their style sources
+in `scripts/generate-gitcliff-presets.mjs`, then regenerate them. See
+[`PRESETS.md`](PRESETS.md) for the preset behavior matrix.

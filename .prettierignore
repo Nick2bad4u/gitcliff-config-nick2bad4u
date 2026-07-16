@@ -16,6 +16,7 @@ docs/docusaurus/.docusaurus/
 docs/packages/
 docs/TSDoc/
 docs/Guides/
+docs/examples/*.md
 
 # MD and MDX files since we use Remark Lint and other tools for those
 

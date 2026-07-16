@@ -7,6 +7,9 @@ Shared [`git-cliff`](https://git-cliff.org/) changelog configuration for Nick2ba
 The package ships:
 
 - `cliff.toml`, the reusable changelog template and commit parser configuration.
+- `presets/*.toml`, 17 standalone alternative layouts using the same parser.
+- `docs/examples/*.md`, deterministic rendered output for every preset.
+- A small JavaScript API for discovering published preset filenames.
 
 ## Install
 
@@ -15,6 +18,24 @@ npm install --save-dev gitcliff-config-nick2bad4u git-cliff
 ```
 
 `git-cliff` is a peer dependency because the consuming repository should control its CLI version. Use git-cliff `2.10.0` or newer; this config uses the commit statistics and release context fields added in that line.
+
+## Preset Styles
+
+Use the default `cliff.toml` for this package's full GitHub-oriented changelog.
+Alternative styles include GitHub, GitLab, Azure DevOps, Keep a Changelog,
+Cocogitto, detailed, minimal, scoped, scope-sorted, statistics, unconventional,
+user-facing-only, monorepo, dependency-audit, and chronological-ledger views.
+
+For example:
+
+```bash
+git cliff --config node_modules/gitcliff-config-nick2bad4u/presets/minimal-user-facing.toml --github-repo Nick2bad4u/my-package --unreleased
+```
+
+See the [preset selection and provider guide](docs/PRESETS.md) for the complete
+matrix, exact filtering rules, GitHub/GitLab/Azure setup, and maintainer workflow.
+The [rendered examples index](docs/examples/README.md) shows the exact offline
+output produced by every preset from the same deterministic tagged history.
 
 ## Recommended Scripts
 

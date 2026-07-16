@@ -5,13 +5,16 @@ Use this checklist when publishing `gitcliff-config-nick2bad4u` or migrating a r
 ## Publish This Config Package
 
 - [ ] Confirm `cliff.toml` has the intended changelog groups, GitHub-style release heading, new contributors block, full changelog compare link, visible per-commit diff statistics, and fallback `[remote.github]` repository.
+- [ ] Run `npm run presets:generate` after shared parser or preset-template changes, then run `npm run presets:check`.
+- [ ] Run `npm run examples:generate` after generating presets, then run `npm run examples:check` and review the rendered files under `docs/examples/`.
+- [ ] Run `npm test -- test/preset-rendering.test.ts` and confirm all published presets render from real tagged history.
 - [ ] Run `npm run changelog:preview:offline` to validate the TOML and Tera template without GitHub API calls.
 - [ ] Run `npm run changelog:preview` and verify commit links point at `Nick2bad4u/gitcliff-config-nick2bad4u`.
 - [ ] Run `npm run build`.
 - [ ] Run `npm run typecheck`.
 - [ ] Run `npm run test`.
 - [ ] Run `npm run lint:package`.
-- [ ] Run `npm pack --dry-run` and confirm the package includes `cliff.toml`, `dist/`, `src/`, `README.md`, and `LICENSE`.
+- [ ] Run `npm pack --dry-run` and confirm the package includes `cliff.toml`, `presets/`, `docs/` including the rendered examples, `dist/`, `src/`, `README.md`, and `LICENSE`.
 - [ ] Confirm `git-cliff` remains a peer dependency with a minimum version that supports commit statistics, release context fields, and GitHub contributor metadata.
 
 ## Migrate A Repository To The Shared Config

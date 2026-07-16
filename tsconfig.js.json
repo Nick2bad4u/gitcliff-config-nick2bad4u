@@ -29,6 +29,8 @@
         "*.d.mts",
         "*.js",
         "*.mjs",
+        "scripts/generate-preset-examples.mjs",
+        "scripts/preset-example-fixture.mjs",
         "test/**/*.mjs",
         "test/_internal/**/*.d.ts"
     ]

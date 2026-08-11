@@ -48,6 +48,7 @@
         "changelog:preview": "git cliff --config cliff.toml --github-repo Nick2bad4u/gitcliff-config-nick2bad4u --unreleased",
         "changelog:preview:offline": "git cliff --config cliff.toml --github-repo Nick2bad4u/gitcliff-config-nick2bad4u --unreleased --offline",
         "changelog:release-notes": "git cliff --config cliff.toml --github-repo Nick2bad4u/gitcliff-config-nick2bad4u --current",
+        "codecov:bundle": "npm exec --yes --ignore-scripts --package=@codecov/bundle-analyzer@2.0.1 -- bundle-analyzer ./dist",
         "coverage": "npx vitest run --coverage",
         "docs:api": "npx typedoc --options typedoc.json",
         "examples:check": "node scripts/generate-preset-examples.mjs --check",

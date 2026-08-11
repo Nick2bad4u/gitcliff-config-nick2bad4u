@@ -71,7 +71,7 @@ https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}
         { pattern = 'Bump ([a-zA-Z0-9@\-\/]+) to.*?(\n\n.*?)*', replace = "[dependency] Update $1" },
         { pattern = 'Bumps \[([^\]]+)\].*?from.*?to.*?(\n\n.*?)*', replace = "[dependency] Update $1" },
         # Remove git trailers that look noisy in rendered changelog entries
-        { pattern = '\n\nSigned-off-by:[^\n\r]*(\r?\nSigned-off-by:[^\n\r]*)*', replace = "" },
+        { pattern = '\r?\n[ \t]*(?:- [ \t]*)?Signed-off-by:[^\n\r]*(?:\r?\n[ \t]*(?:- [ \t]*)?Signed-off-by:[^\n\r]*)*', replace = "" },
         # Collapse control-flow whitespace while preserving one Markdown blank line
         { pattern = '(?:\r?\n[ \t]*){2,}\r?\n', replace = "\n\n" }
     ]

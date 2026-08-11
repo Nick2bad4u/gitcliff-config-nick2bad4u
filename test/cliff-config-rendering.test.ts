@@ -10,8 +10,14 @@ const repositoryRoot = path.dirname(import.meta.dirname);
 const cliffConfigPath = path.join(repositoryRoot, "cliff.toml");
 const gitCliffCliPath = fileURLToPath(import.meta.resolve("git-cliff/cli"));
 
+interface MarkdownNode {
+    readonly children?: readonly MarkdownNode[];
+    readonly type: string;
+    readonly value?: string;
+}
+
 interface RunOptions {
-    readonly env?: NodeJS.ProcessEnv;
+    readonly env?: Readonly<Record<string, string | undefined>>;
 }
 
 const run = async (
@@ -96,6 +102,55 @@ const expectValidGeneratedMarkdown = (changelog: string): void => {
     expect(changelog).not.toMatch(/<!--\s*\d+\s*-->/v);
 };
 
+const getMarkdownText = (node: MarkdownNode): string =>
+    node.type === "text"
+        ? (node.value ?? "")
+        : (node.children?.map(getMarkdownText).join("") ?? "");
+
+const getParagraphTexts = (node: MarkdownNode): readonly string[] =>
+    (node.children ?? [])
+        .filter((child) => child.type === "paragraph")
+        .map(getMarkdownText);
+
+const getNestedListNotes = (node: MarkdownNode): readonly string[] =>
+    (node.children ?? []).flatMap(getParagraphTexts);
+
+const getNestedListsFromListItem = (
+    node: MarkdownNode
+): readonly (readonly string[])[] =>
+    (node.children ?? [])
+        .filter((child) => child.type === "list")
+        .map(getNestedListNotes);
+
+const getNestedListsFromTopLevelList = (
+    node: MarkdownNode
+): readonly (readonly string[])[] =>
+    node.type === "list"
+        ? (node.children ?? []).flatMap(getNestedListsFromListItem)
+        : [];
+
+const getNestedCommitNoteGroups = (
+    changelog: string
+): readonly (readonly string[])[] =>
+    remark().parse(changelog).children.flatMap(getNestedListsFromTopLevelList);
+
+const expectNestedCommitNotes = (changelog: string): void => {
+    const nestedNoteGroups = getNestedCommitNoteGroups(changelog);
+
+    expect(changelog).not.toContain(" <sub><em>(");
+    expect(nestedNoteGroups).toContainEqual([
+        "Handle escaped scopes in parser input.",
+    ]);
+    expect(nestedNoteGroups).toContainEqual([
+        "Document shared config usage.",
+        "Keep release notes nested.",
+    ]);
+    expect(nestedNoteGroups).toHaveLength(2);
+    expect(changelog).not.toMatch(
+        /^(?:Document shared config|Handle escaped scopes|Keep release notes nested)/mv
+    );
+};
+
 const isOrderedRenderedSubjectAndBody = (
     subjectIndex: number,
     bodyIndex: number
@@ -162,8 +217,8 @@ const installSharedConfigFixture = async (
 };
 
 describe("cliff.toml", () => {
-    it("renders repo-specific links, parser groups, dependency cleanup, and compact commit statistics", async () => {
-        expect.assertions(25);
+    it("renders repo-specific links, nested commit notes, dependency cleanup, and inline commit statistics", async () => {
+        expect.assertions(30);
 
         const repoPath = await mkdtemp(path.join(tmpdir(), "gitcliff-config-"));
 
@@ -179,14 +234,15 @@ describe("cliff.toml", () => {
                 repoPath,
                 "fix.txt",
                 "fix(parser): handle escaped scope",
-                "fix\n"
+                "fix\n",
+                "Handle escaped scopes in parser input."
             );
             await commitFixture(
                 repoPath,
                 "docs.txt",
                 "📝 [docs] Explain shared config",
                 "docs\n",
-                "Document shared config usage.\n\nSigned-off-by: Config Test <config-test@example.com>"
+                "Document shared config usage.\n\n- Keep release notes nested.\n\nSigned-off-by: Config Test <config-test@example.com>"
             );
             await commitFixture(
                 repoPath,
@@ -251,7 +307,7 @@ describe("cliff.toml", () => {
             expect(changelog).not.toContain("*(core)* ✨ [feat] (core)");
             expect(changelog).not.toContain("[dependency] test");
             expect(changelog).toMatch(
-                /<sub><em>\(\d+ files?, \+\d+, -\d+\)<\/em><\/sub>/v
+                /&nbsp;<sub><em>\(\d+&nbsp;files?,&nbsp;\+\d+,&nbsp;-\d+\)<\/em><\/sub>/v
             );
             expect(changelog).not.toMatch(/<\/?del>/v);
             expect(
@@ -261,7 +317,7 @@ describe("cliff.toml", () => {
             ).toBe(true);
 
             const documentationSubjectIndex = changelog.indexOf(
-                "Explain shared config <sub><em>"
+                "Explain shared config&nbsp;<sub><em>"
             );
             const documentationBodyIndex = changelog.indexOf(
                 "Document shared config usage."
@@ -273,6 +329,8 @@ describe("cliff.toml", () => {
                     documentationBodyIndex
                 )
             ).toBe(true);
+
+            expectNestedCommitNotes(changelog);
 
             expect(changelog).not.toContain("_(stats:");
             expect(changelog).not.toContain("Signed-off-by:");

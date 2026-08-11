@@ -60,12 +60,28 @@ version = "1.0.1"
       {{ commit_subject
           | upper_first
           | replace(from=" - ", to="\n    - ")
-      }} <sub><em>({{ commit.statistics.files_changed }} file{% if commit.statistics.files_changed != 1 %}s{% endif %}, +{{ commit.statistics.additions }}, -{{ commit.statistics.deletions }})</em></sub>
-{%- for commit_message_line in commit_message_lines %}
-{%- if not loop.first %}
-    {{ commit_message_line | replace(from=" - ", to="\n    - ") }}
+      }}&nbsp;<sub><em>({{ commit.statistics.files_changed }}&nbsp;file{% if commit.statistics.files_changed != 1 %}s{% endif %},&nbsp;+{{ commit.statistics.additions }},&nbsp;-{{ commit.statistics.deletions }})</em></sub>
+{%- if commit.conventional and commit.body %}
+{%- for commit_note_paragraph in commit.body | split(pat="\n\n") %}
+{%- if commit_note_paragraph | trim %}
+{{ "    " }}- {{ commit_note_paragraph
+    | trim
+    | replace_regex(from="^[-*+]\\s+", to="")
+    | replace(from="\n", to="\n      ")
+}}
 {%- endif %}
 {%- endfor %}
+{%- elif not commit.conventional %}
+{%- for commit_note_paragraph in commit.message | split(pat="\n\n") %}
+{%- if not loop.first and commit_note_paragraph | trim %}
+{{ "    " }}- {{ commit_note_paragraph
+    | trim
+    | replace_regex(from="^[-*+]\\s+", to="")
+    | replace(from="\n", to="\n      ")
+}}
+{%- endif %}
+{%- endfor %}
+{%- endif %}
 
   {% endfor %}
 {% endfor %}\n
@@ -137,7 +153,7 @@ Thanks to anyone who has 🧑‍💻 [contributed]({{ self::remote_url() }}/grap
         { pattern = 'Bump ([a-zA-Z0-9@\-\/]+) to.*?(\n\n.*?)*', replace = "[dependency] Update $1" },
         { pattern = 'Bumps \[([^\]]+)\].*?from.*?to.*?(\n\n.*?)*', replace = "[dependency] Update $1" },
         # Remove git trailers that look noisy in rendered changelog entries
-        { pattern = '\n\nSigned-off-by:[^\n\r]*(\r?\nSigned-off-by:[^\n\r]*)*', replace = "" },
+        { pattern = '\r?\n[ \t]*(?:- [ \t]*)?Signed-off-by:[^\n\r]*(?:\r?\n[ \t]*(?:- [ \t]*)?Signed-off-by:[^\n\r]*)*', replace = "" },
         # Collapse control-flow whitespace while preserving one Markdown blank line
         { pattern = '(?:\r?\n[ \t]*){2,}\r?\n', replace = "\n\n" },
     ]

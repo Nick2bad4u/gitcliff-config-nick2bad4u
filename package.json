@@ -90,6 +90,7 @@
         "sync:node-version-files": "node scripts/sync-node-version-files.mjs",
         "sync:node-version-files:check": "node scripts/sync-node-version-files.mjs --check",
         "test": "npx vitest run",
+        "test:ci": "vitest run --coverage --reporter=github-actions --reporter=dot --reporter=junit --outputFile=test-report.junit.xml --silent",
         "test:coverage": "npm run coverage",
         "typecheck": "npx tsc -p tsconfig.json --noEmit && npx tsc -p tsconfig.eslint.json --noEmit && npx tsc -p tsconfig.js.json --noEmit && npx tsc -p tsconfig.vitest-typecheck.json --noEmit",
         "typecheck:all": "npm run typecheck",

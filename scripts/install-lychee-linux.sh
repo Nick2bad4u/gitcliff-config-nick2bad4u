@@ -5,6 +5,7 @@ lychee_version="${LYCHEE_VERSION:-lychee-v0.24.2}"
 lychee_target="${LYCHEE_TARGET:-x86_64-unknown-linux-gnu}"
 archive_name="lychee-${lychee_target}.tar.gz"
 base_url="https://github.com/lycheeverse/lychee/releases/download/${lychee_version}"
+https_protocol="=https"
 install_dir="${LYCHEE_INSTALL_DIR:-${RUNNER_TEMP:-/tmp}/lychee}"
 
 mkdir -p "${install_dir}"
@@ -12,8 +13,8 @@ mkdir -p "${install_dir}"
 archive_path="${install_dir}/${archive_name}"
 checksum_path="${archive_path}.sha256"
 
-curl --fail --location --proto '=https' --proto-redir '=https' --show-error --silent --output "${archive_path}" "${base_url}/${archive_name}"
-curl --fail --location --proto '=https' --proto-redir '=https' --show-error --silent --output "${checksum_path}" "${base_url}/${archive_name}.sha256"
+curl --fail --location --proto "${https_protocol}" --proto-redir "${https_protocol}" --show-error --silent --output "${archive_path}" "${base_url}/${archive_name}"
+curl --fail --location --proto "${https_protocol}" --proto-redir "${https_protocol}" --show-error --silent --output "${checksum_path}" "${base_url}/${archive_name}.sha256"
 
 expected_checksum="$(cut -d ' ' -f 1 "${checksum_path}")"
 actual_checksum="$(sha256sum "${archive_path}" | cut -d ' ' -f 1)"

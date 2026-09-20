@@ -4,6 +4,18 @@ import nickTwoBadFourU from "eslint-config-nick2bad4u";
 const config = [
     ...nickTwoBadFourU.configs.all,
     {
+        files: ["package.json"],
+        name: "gitcliff-config/dependency-free-package",
+        rules: {
+            // The require-dependencies rule mandates the field even though this package
+            // has no runtime dependencies. Keep all other empty-field checks.
+            "package-json/no-empty-fields": [
+                "warn",
+                { ignoreProperties: ["files", "dependencies"] },
+            ],
+        },
+    },
+    {
         ignores: ["docs/examples/**/*.md"],
         name: "gitcliff-config/generated-preset-examples",
     },

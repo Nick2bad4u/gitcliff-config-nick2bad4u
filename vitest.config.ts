@@ -78,7 +78,7 @@ const isCiEnvironment = process.env["CI"] === "true",
         ? ["default", "hanging-process"]
         : ["default"],
     /**
-     * Vitest configuration for eslint-config-nick2bad4u.
+     * Vitest configuration for gitcliff-config-nick2bad4u.
      */
     vitestConfig: ReturnType<typeof defineConfig> = defineConfig({
         cacheDir: "./.cache/vitest",
@@ -97,10 +97,8 @@ const isCiEnvironment = process.env["CI"] === "true",
                 include: [
                     "benchmarks/**/*.bench.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
                 ],
-                includeSamples: true,
                 includeSource: ["src/**/*.ts"],
-                outputJson: "./coverage/bench-results.json",
-                reporters: ["default", "verbose"],
+                retainSamples: true,
             },
             chaiConfig: {
                 includeStack: false,
@@ -193,7 +191,7 @@ const isCiEnvironment = process.env["CI"] === "true",
             dangerouslyIgnoreUnhandledErrors: false,
             deps: {
                 optimizer: {
-                    web: { enabled: false },
+                    client: { enabled: false },
                 },
             },
             diff: {

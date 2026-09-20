@@ -60,7 +60,7 @@ Recommended scripts:
 
 ## Before Release
 
-- [ ] Confirm `private` is absent from `package.json`.
+- [ ] Confirm `private` is `false` in `package.json`.
 - [ ] Confirm `publishConfig.provenance` and registry settings are correct.
 - [ ] Confirm package exports and declaration files match built output.
 - [ ] Create the release tag only after `npm run release:verify` passes locally.
